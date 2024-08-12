@@ -12,22 +12,25 @@ const User = sequelize.define('loginUser', {
         allowNull: false,
         unique: true
     },
+    user_type:{
+
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
     
+}, {
+    // Model options
+    timestamps: true
 });
 
 // Sync the model with the database
 sequelize.sync()
-    .then(async() => {
-        await User.create({
-            'username':'User',
-            'userpassword':"user"
-
-        })
-
+    .then(() => {
+        
         console.log('User table created or already exists.');
     })
     .catch(err => {
         console.error('Error creating table:', err);
     });
 
-module.exports = User;
+module.exports = {User};

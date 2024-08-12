@@ -4,7 +4,7 @@ const app = express()
 const port = 8000
 app.use(express.json())
 require('./config/db')
-require('./models/loginUser')
+require('./models/loginUserModel')
 
 app.use("",loginroute)
 
