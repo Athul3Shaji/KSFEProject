@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import logo from '../assets/ksfe-logo.svg';
+import logo from '../../assets/ksfe-logo.svg';
 
 const Login = () => {
   const [username, setUsername] = useState('');

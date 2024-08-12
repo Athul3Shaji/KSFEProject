@@ -1,8 +1,14 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import Login from "./Login";
-import Enquiry from "./Enquiry";
-import AdminLogin from "./AdminLogin";
+import Login from "./user/Login";
+import Enquiry from "./user/Enquiry";
+import AdminLogin from "./admin/AdminLogin";
+import AdminHome from "./admin/AdminHome";
+import Employee from "./admin/Employee";
+import Chitty from "./admin/Chitty";
+import Agent from "./admin/Agent";
+import About from "./user/About";
+  import ChittyEnroll from "./admin/ChittyEnroll";
 
 const Routing = () => {
   return (
@@ -12,6 +18,13 @@ const Routing = () => {
           <Route path="/" element={<Login/>} />
           <Route path="/enquiry" element={<Enquiry />} />
           <Route path="/admin" element={<AdminLogin />} />
+          <Route path="/adminhome" element={<AdminHome/>}/>
+          <Route path="/employee" element={<Employee/>}/>
+          <Route path="/chitty" element={<Chitty/>}/>
+          <Route path="/agent" element={<Agent/>}/>
+          <Route path="/about" element={<About/>}/>
+          <Route path="/chitty-enrollment" element={<ChittyEnroll/>}/>
+          
           {/* <Route path="/*" element={<ErrorPage />} /> */}
         </Routes>
       </Router>
