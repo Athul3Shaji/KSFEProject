@@ -4,22 +4,20 @@ import { adminLogin } from '../services/services';
 import logo from '../../assets/ksfe-logo.svg';
 import { toast } from 'react-toastify';
 
-
 const AdminLogin = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showMenu, setShowMenu] = useState(false); // State to toggle mobile menu
   const navigate = useNavigate();
 
-  // useEffect(() => {
-  //   if (localStorage.getItem("accessToken")) {
-  //     navigate('/adminhome');
-  //   } else {
-  //     navigate('/admin');
-  //   }
-  // }, [navigate]);
+  useEffect(() => {
+    if (localStorage.getItem("accessToken")) {
+      navigate('/adminhome');
+    } else {
+      navigate('/admin');
+    }
+  }, [navigate]);
 
   const validate = () => {
     let formErrors = {};
@@ -48,6 +46,7 @@ const AdminLogin = () => {
             toast.error("Email not found", { toastId: 71 });
           } else if (data?.accessToken) {
             localStorage.setItem("accessToken", data?.accessToken);
+            localStorage.setItem("userType", data?.user_type);
             localStorage.setItem("refreshToken", data?.refreshToken);
             navigate("/adminhome");
           } else {
@@ -62,10 +61,6 @@ const AdminLogin = () => {
         });
     }
   }, [isSubmitting, username, password, navigate]);
-
-  const toggleMenu = () => {
-    setShowMenu(!showMenu);
-  };
 
   return (
     <div>
@@ -108,9 +103,31 @@ const AdminLogin = () => {
                 </div>
                 <button
                   type="submit"
-                  className="w-full text-white bg-[#043369] hover:bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                  className={`w-full text-white bg-[#043369] hover:bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center ${isSubmitting ? 'cursor-not-allowed' : ''}`}
+                  disabled={isSubmitting}
                 >
-                  Sign in
+                  {isSubmitting ? (
+                    <div className="flex items-center justify-center">
+                      <svg className="animate-spin h-5 w-5 mr-3 text-white" viewBox="0 0 24 24">
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      Signing in...
+                    </div>
+                  ) : (
+                    'Sign in'
+                  )}
                 </button>
               </form>
             </div>
