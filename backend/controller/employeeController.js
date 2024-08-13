@@ -37,6 +37,7 @@ const get_employee_by_id = async (req, res) => {
         if (!employee) {
             return res.status(404).json({ error: "Employee not found" });
         }
+        console.log(employee.isDeleted)
         if (employee.isDeleted) {
             return res.status(400).json({ error: "Cannot update a deleted employee" });
         }
