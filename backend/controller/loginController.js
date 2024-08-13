@@ -17,7 +17,10 @@ const user_login = async (req, res, next) => {
             console.log(token);
             
             
-            return res.send({"user_accestoken": token});
+            return res.send({"user_accestoken": token,
+                'user_type':"user"
+
+            });
         } else {
             // User not found, send a response indicating that
             return res.status(404).send("User not found");
@@ -40,13 +43,15 @@ const admin_login = async (req,res,next)=>{
 
         if (user.user_type == 'admin' ) {
             console.log(user["dataValues"]);
-            const token  =await jwt.sign(user["dataValues"], "ksfeproject",{
+            const token  = await jwt.sign(user["dataValues"], "ksfeproject",{
                 expiresIn : '1hr'
             })
             console.log(token);
             
             
-            return res.send({"admin_accestoken": token});
+            return res.send({"admin_accestoken": token,
+                "user_type":"admin"
+            });
         } else {
             // Admin not found, send a response indicating that
             return res.status(404).send("AdminUser not found");
