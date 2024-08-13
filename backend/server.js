@@ -1,10 +1,15 @@
 const express = require('express')
+const cors = require('cors')
 const loginroute=require('./routes/loginroute')
 const app = express()
 const port = 8000
-app.use(express.json())
+
 require('./config/db')
-require('./models/loginUserModel')
+app.use(cors({
+    "orgin":"*"
+}))
+ 
+app.use(express.json())
 
 app.use("",loginroute)
 
