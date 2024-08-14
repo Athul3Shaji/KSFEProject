@@ -19,7 +19,8 @@ const add_employee = async (req, res) => {
 const get_employees = async (req, res) => {
     try {
         const employees = await Employee.findAll({
-            where: { isDeleted: false } // Filter out soft-deleted employees
+            where: { isDeleted: false },
+            order: [['createdAt', 'DESC']] // Filter out soft-deleted employees
         });
         res.status(200).json(employees);
     } catch (error) {

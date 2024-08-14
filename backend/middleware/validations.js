@@ -1,5 +1,5 @@
 const validateEmployee = (req, res, next) => {
-    const { employee_name, employee_code, employee_mobile } = req.body;
+    const { employee_name, employee_code, employee_mobile,employee_email } = req.body;
 
     // Check if 'employee_name' is a non-empty string
     if (!employee_name || typeof employee_name !== 'string') {
@@ -10,6 +10,11 @@ const validateEmployee = (req, res, next) => {
     if (!employee_code || typeof employee_code !== 'string') {
         return res.status(400).json({ error: "Invalid or missing 'employee_code'. It must be a non-empty string." });
     }
+
+    if (!employee_email || typeof employee_email !== 'string') {
+        return res.status(400).json({ error: "Invalid or missing 'employee_email'. It must be a non-empty string." });
+    }
+
 
     // Check if 'employee_mobile' is a 10-digit number
     if (!employee_mobile || typeof employee_mobile !== 'number' || !/^\d{10}$/.test(employee_mobile.toString())) {
