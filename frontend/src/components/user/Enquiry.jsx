@@ -143,6 +143,7 @@ const Enquiry = () => {
     e.preventDefault();
     const formErrors = validate();
     if (Object.keys(formErrors).length === 0) {
+      console.log(formData,"datassssssssssss");
       toast.success("Details added successfully!");
       setIsSubmitted(true);
       setFormData({
@@ -432,6 +433,7 @@ const Enquiry = () => {
         type="text"
         name="referenceDetail"
         placeholder="Select Reference"
+        disabled
         value={formData.referenceDetail}
         onChange={(e) =>
           setFormData({

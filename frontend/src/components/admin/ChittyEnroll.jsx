@@ -196,7 +196,7 @@ const ChittyEnroll = () => {
                 id="chitty-filter"
                 options={chittiesList}
                 onChange={handleChittyChange}
-                className="flex-1 text-lg"
+                className="flex-1 text-sm"
                 placeholder="Select a Chitty"
                 value={selectedChitty}
               />
@@ -217,7 +217,7 @@ const ChittyEnroll = () => {
             </div>
           ) : (
             <>
-              <table className="w-full text-lg text-left text-gray-700">
+              <table className="w-full text-md text-left text-gray-700">
                 <thead className="text-xs text-gray-100 uppercase bg-gradient-to-r from-[#7fb715] to-[#066769]">
                   <tr>
                     <th scope="col" className="px-2 py-3">
