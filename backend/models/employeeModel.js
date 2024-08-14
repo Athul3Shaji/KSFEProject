@@ -39,6 +39,19 @@ const Employee  = sequelize.define('employee',{
             }
         }
     },
+    employee_email: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: {
+            args: true,
+            msg: "Employee email must be unique"
+        },
+        validate: {
+            isEmail: { msg: "Must be a valid email address" },
+            notEmpty: { msg: "Employee email is required" }
+        }
+    },
+    
     isDeleted :{
         type:DataTypes.BOOLEAN,
         allowNull: false,

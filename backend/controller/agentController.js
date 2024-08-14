@@ -20,7 +20,8 @@ const add_agent = async (req, res) => {
 const get_agents = async (req, res) => {
     try {
         const agents = await Agent.findAll({
-            where: { isDeleted: false } // Filter out soft-deleted agents
+            where: { isDeleted: false },
+            order: [['createdAt', 'DESC']]// Filter out soft-deleted agents
         });
         res.status(200).json(agents);
     } catch (error) {
