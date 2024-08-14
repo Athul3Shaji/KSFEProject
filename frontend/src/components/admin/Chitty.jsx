@@ -174,7 +174,7 @@ const Chitty = () => {
   <Navbar />
   <div className="min-h-[calc(100vh-90px)] bg-white flex flex-col items-center pt-10">
   <h1 className="text-4xl font-bold text-gray-800 mb-6 text-center">
-            Chitty Enrollment
+            Chitties
           </h1>
     <div className="w-3/5 flex justify-between items-center mb-4">
       <div className="flex w-full justify-between">

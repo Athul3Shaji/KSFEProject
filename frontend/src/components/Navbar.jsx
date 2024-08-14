@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import logo from "../assets/ksfe-logo.svg";
 import { IoIosArrowForward } from "react-icons/io";
+import { FaSignOutAlt } from "react-icons/fa";
 
 const Navbar = () => {
   const [isSubMenuOpen, setIsSubMenuOpen] = useState(false);
@@ -20,6 +21,11 @@ const Navbar = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/admin");
+  };
 
   return (
     <nav className="bg-[#06296b] border-gray-200 relative z-50">
@@ -92,7 +98,9 @@ const Navbar = () => {
                   setIsSubMenuOpen(!isSubMenuOpen);
                 }}
               >
-                <span className="block py-2 px-3 text-white md:p-0">Services</span>
+                <span className="block py-2 px-3 text-white md:p-0">
+                  Services
+                </span>
                 <IoIosArrowForward
                   className={`text-white transition-transform duration-300 ${
                     isSubMenuOpen ? "rotate-90" : ""
@@ -167,6 +175,14 @@ const Navbar = () => {
               >
                 About
               </NavLink>
+            </li>
+            <li>
+              <button
+                onClick={handleLogout}
+                className="flex items-center py-2 px-3 text-white md:p-0"
+              >
+                Logout <FaSignOutAlt className="ml-1 mt-1" />
+              </button>
             </li>
           </ul>
         </div>

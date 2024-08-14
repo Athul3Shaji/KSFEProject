@@ -134,34 +134,40 @@ const Agent = () => {
     <>
       <Navbar />
       <div className="min-h-[calc(100vh-90px)] bg-white flex flex-col items-center pt-10">
-        <div className="w-3/5 flex justify-between items-center mb-4">
-          <h1 className="text-4xl font-bold mb-10 text-blue-800">Agents</h1>
-          <div className="relative w-80">
-            <label htmlFor="chitty-search" className="sr-only">
-              Search
-            </label>
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <CiSearch className="text-gray-500 w-5 h-5" />
-            </div>
-            <input
-              type="text"
-              id="chitty-search"
-              className="block w-full pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-600 focus:border-blue-600 p-2.5"
-              placeholder="Search"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+      <h1 className="text-4xl font-bold text-gray-800 mb-6 text-center">
+            Agents
+          </h1>
+    <div className="w-3/5 flex justify-between items-center mb-4">
+      <div className="flex w-full justify-between">
+        <div className="relative w-80">
+          <label htmlFor="chitty-search" className="sr-only">
+            Search
+          </label>
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <CiSearch className="text-gray-500 w-5 h-5" />
           </div>
+          <input
+            type="text"
+            id="chitty-search"
+            className="block w-full pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-600 focus:border-blue-600 p-2.5"
+            placeholder="Search"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
 
-        <div className="w-3/5 mb-4 flex justify-end">
+        <div className="relative w-auto">
           <button
-            className="bg-blue-800 text-gray-100 px-4 py-2 flex rounded-md hover:bg-blue-600"
+            className="bg-blue-900 text-gray-100 px-4 py-2 flex rounded-md hover:bg-blue-700"
             onClick={() => setIsModalOpen(true)}
           >
-            Add Agent <FaCirclePlus className="ml-1 mt-1 w-5 h-5" />
+            Add agent <FaCirclePlus className="ml-1 mt-1 w-5 h-5" />
           </button>
         </div>
+      </div>
+    </div>
+
+    <div className="w-3/5 mb-4 flex justify-end"></div>
 
         <div className="relative overflow-x-auto shadow-md sm:rounded-lg w-3/5">
           <table className="w-full text-md text-left text-gray-700">

@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes,Navigate } from "react-router-dom";
 import Login from "./user/Login";
 import Enquiry from "./user/Enquiry";
 import AdminLogin from "./admin/AdminLogin";
@@ -15,7 +15,8 @@ const Routing = () => {
     <>
       <Router>
         <Routes>
-          <Route path="/" element={<Login/>} />
+        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/login" element={<Login />} />
           <Route path="/enquiry" element={<Enquiry />} />
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/adminhome" element={<AdminHome/>}/>

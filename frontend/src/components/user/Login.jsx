@@ -1,12 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { userLogin } from '../services/services';
 import logo from '../../assets/ksfe-logo.svg';
+import { toast } from 'react-toastify';
 
 const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (localStorage.getItem("user_accestoken")) {
+      navigate('/enquiry');
+    } else {
+      navigate('/login');
+    }
+  }, [navigate]);
 
   const validate = () => {
     let formErrors = {};
@@ -19,11 +30,42 @@ const Login = () => {
     e.preventDefault();
     const formErrors = validate();
     if (Object.keys(formErrors).length === 0) {
-      navigate('/enquiry');
+      setIsSubmitting(true);
     } else {
       setErrors(formErrors);
     }
   };
+
+  useEffect(() => {
+    if (isSubmitting) {
+      const loginData = {
+        username,
+        userpassword: password,
+      };
+
+      userLogin(loginData)
+        .then((data) => {
+          if (data?.errorCode === 768) {
+            toast.error("Incorrect password", { toastId: 70 });
+          } else if (data?.errorCode === 778) {
+            toast.error("Email not found", { toastId: 71 });
+          } else if (data?.user_accestoken) {
+            localStorage.setItem("user_accestoken", data?.user_accestoken);
+            localStorage.setItem("userType", data?.user_type);
+            localStorage.setItem("refreshToken", data?.refreshToken);
+            navigate("/enquiry");
+          } else {
+            toast.error(data?.message, { toastId: 56 });
+          }
+        })
+        .catch((err) => {
+          toast.error(err?.response?.data?.message, { toastId: 7 });
+        })
+        .finally(() => {
+          setIsSubmitting(false);
+        });
+    }
+  }, [isSubmitting, username, password, navigate]);
 
   return (
     <div>
@@ -67,8 +109,9 @@ const Login = () => {
                 <button
                   type="submit"
                   className="w-full text-white bg-[#043369] hover:bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                  disabled={isSubmitting}
                 >
-                  Sign in
+                  {isSubmitting ? "Signing in..." : "Sign in"}
                 </button>
               </form>
             </div>

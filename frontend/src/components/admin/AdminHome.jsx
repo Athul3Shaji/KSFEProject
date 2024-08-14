@@ -36,7 +36,7 @@ const AdminHome = () => {
   return (
     <>
       <Navbar />
-      <div className="flex flex-col items-center pt-12 bg-gray-200 min-h-[calc(100vh-72px)]">
+      <div className="flex flex-col items-center pt-12 bg-gray-200 min-h-[calc(100vh-90px)]">
         <h1 className="text-4xl font-bold mb-10 text-bluedark">Admin Home</h1>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6 px-4 max-w-screen-xl w-full">
           <div className="relative group" ref={menuRef}>

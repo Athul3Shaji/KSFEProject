@@ -1,21 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { adminLogin } from '../services/services';
-import logo from '../../assets/ksfe-logo.svg';
-import { toast } from 'react-toastify';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { adminLogin } from "../services/services";
+import logo from "../../assets/ksfe-logo.svg";
+import { toast, ToastContainer } from "react-toastify";
 
 const AdminLogin = () => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentToastId, setCurrentToastId] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (localStorage.getItem("accessToken")) {
-      navigate('/adminhome');
+    if (localStorage.getItem("admin_accestoken")) {
+      navigate("/adminhome");
     } else {
-      navigate('/admin');
+      navigate("/admin");
     }
   }, [navigate]);
 
@@ -38,29 +39,45 @@ const AdminLogin = () => {
 
   useEffect(() => {
     if (isSubmitting) {
-      adminLogin({ username, password })
+      const loginData = {
+        username,
+        userpassword: password,
+      };
+
+      adminLogin(loginData)
         .then((data) => {
-          if (data?.errorCode === 768) {
-            toast.error("Incorrect password", { toastId: 70 });
-          } else if (data?.errorCode === 778) {
-            toast.error("Email not found", { toastId: 71 });
-          } else if (data?.accessToken) {
-            localStorage.setItem("accessToken", data?.accessToken);
+          if (currentToastId) {
+            toast.dismiss(currentToastId);
+          }
+
+          if (data?.admin_accestoken) {
+            localStorage.setItem("admin_accestoken", data?.admin_accestoken);
             localStorage.setItem("userType", data?.user_type);
             localStorage.setItem("refreshToken", data?.refreshToken);
             navigate("/adminhome");
+          } else if (data?.errorCode === 500) {
+            const toastId = toast.error("Incorrect password", { toastId: 70 });
+            setCurrentToastId(toastId);
+          } else if (data?.errorCode === 500) {
+            const toastId = toast.error("Email not found", { toastId: 71 });
+            setCurrentToastId(toastId);
           } else {
-            toast.error(data?.message, { toastId: 56 });
+            const toastId = toast.error(data?.message || "An unexpected error occurred.", { toastId: 56 });
+            setCurrentToastId(toastId);
           }
         })
         .catch((err) => {
-          toast.error(err?.response?.data?.message, { toastId: 7 });
+          if (currentToastId) {
+            toast.dismiss(currentToastId);
+          }
+          const toastId = toast.error(err?.response?.data || 'Error logging in. Please try again.', { toastId: 7 });
+          setCurrentToastId(toastId);
         })
         .finally(() => {
           setIsSubmitting(false);
         });
     }
-  }, [isSubmitting, username, password, navigate]);
+  }, [isSubmitting, username, password, navigate, currentToastId]);
 
   return (
     <div>
@@ -74,41 +91,68 @@ const AdminLogin = () => {
               </h1>
               <form className="space-y-4 md:space-y-6" onSubmit={handleSubmit}>
                 <div>
-                  <label htmlFor="username" className="block mb-2 text-sm font-medium text-black">Username</label>
+                  <label
+                    htmlFor="username"
+                    className="block mb-2 text-sm font-medium text-black"
+                  >
+                    Username
+                  </label>
                   <input
                     type="text"
                     name="username"
                     id="username"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    className={`bg-white border ${errors.username ? 'border-red-500' : 'border-black'} text-black rounded-lg focus:ring-black focus:border-black block w-full p-2.5`}
+                    className={`bg-white border ${
+                      errors.username ? "border-red-500" : "border-black"
+                    } text-black rounded-lg focus:ring-black focus:border-black block w-full p-2.5`}
                     placeholder="Username"
                     required
                   />
-                  {errors.username && <p className="text-red-500 text-xs mt-1">{errors.username}</p>}
+                  {errors.username && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.username}
+                    </p>
+                  )}
                 </div>
                 <div>
-                  <label htmlFor="password" className="block mb-3 text-sm font-medium text-black">Password</label>
+                  <label
+                    htmlFor="password"
+                    className="block mb-3 text-sm font-medium text-black"
+                  >
+                    Password
+                  </label>
                   <input
                     type="password"
                     name="password"
                     id="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className={`bg-white border ${errors.password ? 'border-red-500' : 'border-black'} text-black rounded-lg focus:ring-black focus:border-black block w-full p-2.5`}
+                    className={`bg-white border ${
+                      errors.password ? "border-red-500" : "border-black"
+                    } text-black rounded-lg focus:ring-black focus:border-black block w-full p-2.5`}
                     placeholder="***********"
                     required
                   />
-                  {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
+                  {errors.password && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.password}
+                    </p>
+                  )}
                 </div>
                 <button
                   type="submit"
-                  className={`w-full text-white bg-[#043369] hover:bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center ${isSubmitting ? 'cursor-not-allowed' : ''}`}
+                  className={`w-full text-white bg-[#043369] hover:bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center ${
+                    isSubmitting ? "cursor-not-allowed" : ""
+                  }`}
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (
                     <div className="flex items-center justify-center">
-                      <svg className="animate-spin h-5 w-5 mr-3 text-white" viewBox="0 0 24 24">
+                      <svg
+                        className="animate-spin h-5 w-5 mr-3 text-white"
+                        viewBox="0 0 24 24"
+                      >
                         <circle
                           className="opacity-25"
                           cx="12"
@@ -126,7 +170,7 @@ const AdminLogin = () => {
                       Signing in...
                     </div>
                   ) : (
-                    'Sign in'
+                    "Sign in"
                   )}
                 </button>
               </form>
@@ -134,6 +178,7 @@ const AdminLogin = () => {
           </div>
         </div>
       </section>
+      <ToastContainer position="top-center" />
     </div>
   );
 };
