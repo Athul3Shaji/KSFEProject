@@ -13,22 +13,8 @@ const AdminLogin = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const handleUnload = () => {
-      localStorage.removeItem("accessToken");
-    };
-  
-    window.addEventListener("beforeunload", handleUnload);
-  
-    return () => {
-      window.removeEventListener("beforeunload", handleUnload);
-    };
-  }, []);
-  
-  useEffect(() => {
     if (localStorage.getItem("accessToken")) {
       navigate("/adminhome");
-    } else {
-      navigate("/admin");
     }
   }, [navigate]);
 
@@ -58,19 +44,21 @@ const AdminLogin = () => {
 
       adminLogin(loginData)
         .then((data) => {
+          console.log(data);
+
           if (currentToastId) {
             toast.dismiss(currentToastId);
           }
 
-          if (data?.accessToken) {
-            localStorage.setItem("accessToken", data?.admin_accestoken);
-            localStorage.setItem("userType", data?.user_type);
-            localStorage.setItem("refreshToken", data?.refreshToken);
+          if (data?.admin_accestoken) {
+            localStorage.setItem("accessToken", data.user_accestoken);
+            localStorage.setItem("userType", data.user_type);
+            localStorage.setItem("refreshToken", data.refreshToken);
             navigate("/adminhome");
-          } else if (data?.errorCode === 500) {
+          } else if (data?.errorCode === 768) {
             const toastId = toast.error("Incorrect password", { toastId: 70 });
             setCurrentToastId(toastId);
-          } else if (data?.errorCode === 500) {
+          } else if (data?.errorCode === 778) {
             const toastId = toast.error("Email not found", { toastId: 71 });
             setCurrentToastId(toastId);
           } else {
@@ -82,7 +70,7 @@ const AdminLogin = () => {
           if (currentToastId) {
             toast.dismiss(currentToastId);
           }
-          const toastId = toast.error(err?.response?.data || 'Error logging in. Please try again.', { toastId: 7 });
+          const toastId = toast.error(err?.response?.data?.message || 'Error logging in. Please try again.', { toastId: 7 });
           setCurrentToastId(toastId);
         })
         .finally(() => {
