@@ -4,48 +4,72 @@ import { MdEdit } from "react-icons/md";
 import { FaTrashAlt } from "react-icons/fa";
 import { FaCirclePlus } from "react-icons/fa6";
 import { ToastContainer, toast } from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css';
+import "react-toastify/dist/ReactToastify.css";
 import { CiSearch } from "react-icons/ci";
-
-const initialEmployees = [
-  { id: 1001, name: "John Doe", mobile: "1234567890", email: "john@example.com" },
-  { id: 1002, name: "Jane Smith", mobile: "0987654321", email: "jane@example.com" },
-  { id: 1003, name: "Alice Johnson", mobile: "1231231234", email: "alice@example.com" },
-  { id: 1004, name: "Bob Brown", mobile: "3213214321", email: "bob@example.com" },
-  { id: 1005, name: "Charlie White", mobile: "4564564567", email: "charlie@example.com" },
-  { id: 1006, name: "David Black", mobile: "9876543210", email: "david@example.com" },
-  { id: 1007, name: "Emma Green", mobile: "6543219870", email: "emma@example.com" },
-  { id: 1008, name: "Frank Moore", mobile: "4567890123", email: "frank@example.com" },
-];
+import {
+  fetchEmployees,
+  addEmployee,
+  updateEmployee,
+  deleteEmployee,
+} from "../services/services";
 
 const Employee = () => {
-  const [employees, setEmployees] = useState(initialEmployees);
+  const [employees, setEmployees] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newEmployee, setNewEmployee] = useState({
-    id: "",
     name: "",
-    mobile: "",
+    code: "",
     email: "",
+    mobile: "",
+  });
+
+  const [formErrors, setFormErrors] = useState({
+    name: "",
+    code: "",
+    email: "",
+    mobile: "",
   });
   const [isEditMode, setIsEditMode] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredEmployees = employees.filter(employee =>
-    employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    employee.mobile.includes(searchTerm) ||
-    employee.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredEmployees = employees.filter((employee) => {
+    const name = employee.name ? employee.name.toLowerCase() : "";
+    const email = employee.email ? employee.email.toLowerCase() : "";
+    const mobile = employee.mobile ? employee.mobile : "";
+  
+    return (
+      name.includes(searchTerm.toLowerCase()) ||
+      mobile.includes(searchTerm) ||
+      email.includes(searchTerm.toLowerCase())
+    );
+  });
+  
 
   const [currentPage, setCurrentPage] = useState(1);
   const employeesPerPage = 7;
 
   const indexOfLastEmployee = currentPage * employeesPerPage;
   const indexOfFirstEmployee = indexOfLastEmployee - employeesPerPage;
-  const currentEmployees = filteredEmployees.slice(indexOfFirstEmployee, indexOfLastEmployee);
+  const currentEmployees = filteredEmployees.slice(
+    indexOfFirstEmployee,
+    indexOfLastEmployee
+  );
   const totalPages = Math.ceil(filteredEmployees.length / employeesPerPage);
 
   const modalRef = useRef(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const employeesData = await fetchEmployees();
+        setEmployees(employeesData);
+      } catch (error) {
+        toast.error("Error fetching employees.");
+      }
+    };
+    fetchData();
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -82,55 +106,100 @@ const Employee = () => {
   };
 
   const validateData = () => {
-    if (!/^\d+$/.test(newEmployee.id)) {
-      toast.error("Invalid Employee ID. It should be numeric.");
-      return false;
+    let isValid = true;
+    const errors = { name: "", code: "", mobile: "", email: "" };
+  
+    if (!newEmployee.name || !newEmployee.name.trim()) {
+      errors.name = "*Employee Name is required.";
+      isValid = false;
+    }
+    if (!newEmployee.code || !newEmployee.code.trim()) {
+      errors.code = "*Employee Code is required.";
+      isValid = false;
     }
     if (!/^\d{10}$/.test(newEmployee.mobile)) {
-      toast.error("Invalid Mobile Number. It should be 10 digits.");
-      return false;
+      errors.mobile = "*Mobile Number Should be 10 digits.";
+      isValid = false;
     }
     if (!/\S+@\S+\.\S+/.test(newEmployee.email)) {
-      toast.error("Invalid Email Address.");
-      return false;
+      errors.email = "*Invalid Email Address.";
+      isValid = false;
     }
-    if (employees.some(emp => emp.id === newEmployee.id && !isEditMode)) {
-      toast.error("Employee ID already exists.");
-      return false;
+    if (
+      employees.some(
+        (employee) =>
+          employee.employee_code === newEmployee.code &&
+          employee.id !== newEmployee.id
+      )
+    ) {
+      errors.code = "*Employee code already exists.";
+      isValid = false;
     }
-    return true;
+  
+    setFormErrors(errors);
+    return isValid;
   };
+  
 
-  const handleAddEmployee = (e) => {
+  const handleAddEmployee = async (e) => {
     e.preventDefault();
     if (!validateData()) return;
 
-    if (isEditMode) {
-      const updatedEmployees = employees.map((emp, index) =>
-        index === editIndex ? newEmployee : emp
-      );
-      setEmployees(updatedEmployees);
-      toast.success("Employee updated successfully.");
-      setIsEditMode(false);
-    } else {
-      setEmployees((prev) => [...prev, newEmployee]);
-      toast.success("Employee added successfully.");
+    const employeeData = {
+      employee_name: newEmployee.name,
+      employee_code: newEmployee.code,
+      employee_mobile: Number(newEmployee.mobile),
+      employee_email: newEmployee.email,
+    };
+
+    try {
+      if (isEditMode) {
+        await updateEmployee(newEmployee.id, employeeData);
+        const updatedEmployees = employees.map((employee) =>
+          employee.id === newEmployee.id
+            ? { ...employee, ...employeeData }
+            : employee
+        );
+        setEmployees(updatedEmployees);
+        toast.success("Employee updated successfully.");
+      } else {
+        const response = await addEmployee(employeeData); 
+        const newEmployeeWithId = { ...employeeData, id: response.id };
+        setEmployees((prev) => [...prev, newEmployeeWithId]);
+        toast.success("Employee added successfully.");
+      }
+    } catch (error) {
+      toast.error("Error occurred while saving employee.");
     }
 
-    setNewEmployee({ id: "", name: "", mobile: "", email: "" });
-    setIsModalOpen(false);
+    handleCloseModal();
   };
 
-  const handleEdit = (index) => {
-    setEditIndex(index);
-    setNewEmployee(employees[index]);
+  const handleEdit = (employeeId) => {
+    const employeeToEdit = employees.find(
+      (employee) => employee.id === employeeId
+    );
+    setNewEmployee({
+      id: employeeToEdit.id,
+      name: employeeToEdit.employee_name,
+      code: employeeToEdit.employee_code,
+      mobile: employeeToEdit.employee_mobile,
+      email: employeeToEdit.employee_email,
+    });
     setIsEditMode(true);
     setIsModalOpen(true);
   };
 
-  const handleDelete = (index) => {
-    setEmployees((prev) => prev.filter((_, i) => i !== index));
-    toast.success("Employee deleted successfully.");
+  const handleDelete = async (employeeId) => {
+    try {
+      await deleteEmployee(employeeId);
+      setEmployees((prev) =>
+        prev.filter((employee) => employee.id !== employeeId)
+      );
+      toast.success("Employee deleted successfully.");
+    } catch (error) {
+      toast.error("Error deleting employee.");
+    }
   };
 
   const handleCloseModal = () => {
@@ -143,57 +212,72 @@ const Employee = () => {
     <>
       <Navbar />
       <div className="min-h-[calc(100vh-90px)] bg-white flex flex-col items-center pt-10">
-      <h1 className="text-4xl font-bold text-gray-800 mb-6 text-center">
-            Employees
-          </h1>
-    <div className="w-3/5 flex justify-between items-center mb-4">
-      <div className="flex w-full justify-between">
-        <div className="relative w-80">
-          <label htmlFor="chitty-search" className="sr-only">
-            Search
-          </label>
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <CiSearch className="text-gray-500 w-5 h-5" />
+        <h1 className="text-4xl font-bold text-gray-800 mb-6 text-center">
+          Employees
+        </h1>
+        <div className="w-3/5 flex justify-between items-center mb-4">
+          <div className="flex w-full justify-between">
+            <div className="relative w-80">
+              <label htmlFor="chitty-search" className="sr-only">
+                Search
+              </label>
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <CiSearch className="text-gray-500 w-5 h-5" />
+              </div>
+              <input
+                type="text"
+                id="chitty-search"
+                className="block w-full pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-600 focus:border-blue-600 p-2.5"
+                placeholder="Search"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+
+            <div className="relative w-auto">
+              <button
+                className="bg-blue-900 text-gray-100 px-4 py-2 flex rounded-md hover:bg-blue-700"
+                onClick={() => setIsModalOpen(true)}
+              >
+                Add Employee <FaCirclePlus className="ml-1 mt-1 w-5 h-5" />
+              </button>
+            </div>
           </div>
-          <input
-            type="text"
-            id="chitty-search"
-            className="block w-full pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-600 focus:border-blue-600 p-2.5"
-            placeholder="Search"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
         </div>
 
-        <div className="relative w-auto">
-          <button
-            className="bg-blue-900 text-gray-100 px-4 py-2 flex rounded-md hover:bg-blue-700"
-            onClick={() => setIsModalOpen(true)}
-          >
-            Add Employee <FaCirclePlus className="ml-1 mt-1 w-5 h-5" />
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div className="w-3/5 mb-4 flex justify-end"></div>
+        <div className="w-3/5 mb-4 flex justify-end"></div>
 
         <div className="relative overflow-x-auto shadow-md sm:rounded-lg w-3/5">
           <table className="w-full text-sm text-left text-gray-700">
             <thead className="text-xs text-gray-100 uppercase bg-gradient-to-r from-[#7fb715] to-[#066769]">
               <tr>
-                <th scope="col" className="px-2 py-3">Employee ID</th>
-                <th scope="col" className="px-6 py-3">Name</th>
-                <th scope="col" className="px-7 py-3">Mobile</th>
-                <th scope="col" className="px-11 py-3">Email</th>
-                <th scope="col" className="px-3 py-3">Action</th>
+                <th scope="col" className="px-2 py-3">
+                  Employee ID
+                </th>
+                <th scope="col" className="px-6 py-3">
+                  Name
+                </th>
+                <th scope="col" className="px-7 py-3">
+                  Employee Code
+                </th>
+                <th scope="col" className="px-11 py-3">
+                  Email
+                </th>
+                <th scope="col" className="px-3 py-3">
+                  Mobile
+                </th>
+                <th scope="col" className="px-3 py-3">
+                  Action
+                </th>
               </tr>
             </thead>
             <tbody>
               {currentEmployees.map((employee, index) => (
                 <tr
                   key={employee.id}
-                  className={`${index % 2 === 0 ? "bg-gray-200" : "bg-blue-50"} border-b`}
+                  className={`${
+                    index % 2 === 0 ? "bg-gray-200" : "bg-blue-50"
+                  } border-b`}
                 >
                   <th
                     scope="row"
@@ -201,23 +285,32 @@ const Employee = () => {
                   >
                     {employee.id}
                   </th>
-                  <td className="px-2 py-3 text-base">{employee.name}</td>
-                  <td className="px-2 py-3 text-base">{employee.mobile}</td>
-                  <td className="px-2 py-3 text-base">{employee.email}</td>
+                  <td className="px-2 py-3 text-base">
+                    {employee.employee_name}
+                  </td>
+                  <td className="px-2 py-3 text-base">
+                    {employee.employee_code}
+                  </td>
+                  <td className="px-2 py-3 text-base">
+                    {employee.employee_email}
+                  </td>
+                  <td className="px-2 py-3 text-base">
+                    {employee.employee_mobile}
+                  </td>
                   <td className="px-2 py-3 flex space-x-4">
                     <a
                       href="#"
                       className="text-blue-600 hover:text-blue-800"
-                      onClick={() => handleEdit(index)}
+                      onClick={() => handleEdit(employee.id)}
                     >
-                      <MdEdit className="w-5 h-5"/>
+                      <MdEdit className="w-5 h-5" />
                     </a>
                     <a
                       href="#"
                       className="text-red-600 hover:text-red-800"
-                      onClick={() => handleDelete(index)}
+                      onClick={() => handleDelete(employee.id)}
                     >
-                      <FaTrashAlt className="w-4 h-4"/>
+                      <FaTrashAlt className="w-5 h-5" />
                     </a>
                   </td>
                 </tr>
@@ -231,7 +324,9 @@ const Employee = () => {
                 onClick={handlePrevPage}
                 disabled={currentPage === 1}
                 className={`px-4 py-2 rounded-md ${
-                  currentPage === 1 ? "bg-gray-400 text-gray-600" : "bg-blue-600 text-gray-100 hover:bg-[#055160]"
+                  currentPage === 1
+                    ? "bg-gray-400 text-gray-600"
+                    : "bg-blue-600 text-gray-100 hover:bg-[#055160]"
                 }`}
               >
                 Previous
@@ -243,7 +338,9 @@ const Employee = () => {
                 onClick={handleNextPage}
                 disabled={currentPage === totalPages}
                 className={`px-4 py-2 rounded-md ${
-                  currentPage === totalPages ? "bg-gray-400 text-gray-600" : "bg-blue-600 text-gray-100 hover:bg-[#055160]"
+                  currentPage === totalPages
+                    ? "bg-gray-400 text-gray-600"
+                    : "bg-blue-600 text-gray-100 hover:bg-[#055160]"
                 }`}
               >
                 Next
@@ -257,7 +354,10 @@ const Employee = () => {
             id="crud-modal"
             className="fixed top-0 right-0 left-0 z-50 flex justify-center items-center w-full h-full bg-gray-900 bg-opacity-50"
           >
-            <div ref={modalRef} className="relative p-4 w-full max-w-lg max-h-full">
+            <div
+              ref={modalRef}
+              className="relative p-4 w-full max-w-lg max-h-full"
+            >
               <div className="relative bg-white rounded-lg shadow">
                 <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t bg-blue-800">
                   <h3 className="text-lg font-semibold text-white">
@@ -286,87 +386,108 @@ const Employee = () => {
                     <span className="sr-only">Close modal</span>
                   </button>
                 </div>
-                <form className="p-4 md:p-5" onSubmit={handleAddEmployee}>
+                <form onSubmit={handleAddEmployee} className="p-4 md:p-5">
                   <div className="grid gap-4 mb-4 grid-cols-2">
-                    <div className="col-span-2 sm:col-span-1">
+                    <div className="col-span-2">
                       <label
-                        htmlFor="id"
-                        className="block mb-2 text-sm font-medium text-gray-900"
+                        htmlFor="employee-name"
+                        className="block mb-2 text-md font-medium text-gray-900"
                       >
-                        Employee ID
+                        Name<sup className="text-red-500">*</sup>
                       </label>
                       <input
                         type="text"
-                        name="id"
-                        id="id"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5"
-                        placeholder="Enter employee ID"
-                        value={newEmployee.id}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </div>
-                    <div className="col-span-2 sm:col-span-2">
-                      <label
-                        htmlFor="name"
-                        className="block mb-2 text-sm font-medium text-gray-900"
-                      >
-                        Name
-                      </label>
-                      <input
-                        type="text"
+                        id="employee-name"
                         name="name"
-                        id="name"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5"
-                        placeholder="Enter employee name"
                         value={newEmployee.name}
                         onChange={handleInputChange}
+                        className="block w-full text-md text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-600 focus:border-blue-600 p-2.5"
+                        placeholder="Enter employee name"
                         required
                       />
+                      {formErrors.name && (
+                        <p className="text-red-500 text-xs mt-1">
+                          {formErrors.name}
+                        </p>
+                      )}
                     </div>
                     <div className="col-span-2 sm:col-span-1">
                       <label
-                        htmlFor="mobile"
-                        className="block mb-2 text-sm font-medium text-gray-900"
+                        htmlFor="employee-code"
+                        className="block mb-2 text-md font-medium text-gray-900"
                       >
-                        Mobile
+                        Employee Code<sup className="text-red-500">*</sup>
                       </label>
                       <input
                         type="text"
-                        name="mobile"
-                        id="mobile"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5"
-                        placeholder="Enter mobile number"
-                        value={newEmployee.mobile}
+                        id="employee-code"
+                        name="code"
+                        value={newEmployee.code}
                         onChange={handleInputChange}
+                        className="block w-full text-md text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-600 focus:border-blue-600 p-2.5"
+                        placeholder="Enter employee code"
                         required
                       />
+                      {formErrors.code && (
+                        <p className="text-red-500 text-xs mt-1">
+                          {formErrors.code}
+                        </p>
+                      )}
                     </div>
                     <div className="col-span-2 sm:col-span-1">
                       <label
-                        htmlFor="email"
-                        className="block mb-2 text-sm font-medium text-gray-900"
+                        htmlFor="employee-email"
+                        className="block mb-2 text-md font-medium text-gray-900"
                       >
-                        Email
+                        Email<sup className="text-red-500">*</sup>
                       </label>
                       <input
                         type="email"
+                        id="employee-email"
                         name="email"
-                        id="email"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5"
-                        placeholder="Enter email address"
                         value={newEmployee.email}
                         onChange={handleInputChange}
+                        className="block w-full text-md text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-600 focus:border-blue-600 p-2.5"
+                        placeholder="Enter email"
                         required
                       />
+                      {formErrors.email && (
+                        <p className="text-red-500 text-xs mt-1">
+                          {formErrors.email}
+                        </p>
+                      )}
+                    </div>
+                    <div className="col-span-2 sm:col-span-1">
+                      <label
+                        htmlFor="employee-mobile"
+                        className="block mb-2 text-md font-medium text-gray-900"
+                      >
+                        Mobile<sup className="text-red-500">*</sup>
+                      </label>
+                      <input
+                        type="text"
+                        id="employee-mobile"
+                        name="mobile"
+                        value={newEmployee.mobile}
+                        onChange={handleInputChange}
+                        maxLength={10}
+                        className="block w-full text-md text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-600 focus:border-blue-600 p-2.5"
+                        placeholder="Enter mobile number"
+                        required
+                      />
+                      {formErrors.mobile && (
+                        <p className="text-red-500 text-xs mt-1">
+                          {formErrors.mobile}
+                        </p>
+                      )}
                     </div>
                   </div>
                   <div className="flex justify-center">
                     <button
                       type="submit"
-                      className="bg-blue-900 text-gray-100 inline-flex items-center hover:bg-blue-700 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                      className="bg-blue-900 text-white inline-flex items-center hover:bg-blue-700 font-medium rounded-lg text-md px-5 py-2.5 text-center"
                     >
-                      {isEditMode ? "Update Employee" : "Add Employee"}
+                      {isEditMode ? "Update Employee" : "Add New Employee"}
                     </button>
                   </div>
                 </form>
@@ -375,7 +496,7 @@ const Employee = () => {
           </div>
         )}
       </div>
-      <ToastContainer />
+      <ToastContainer position="top-center"/>
     </>
   );
 };

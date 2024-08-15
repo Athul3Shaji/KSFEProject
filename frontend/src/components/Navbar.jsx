@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import logo from "../assets/ksfe-logo.svg";
 import { IoIosArrowForward } from "react-icons/io";
 import { FaSignOutAlt } from "react-icons/fa";
+import { useLogout } from "./services/services";
 
 const Navbar = () => {
   const [isSubMenuOpen, setIsSubMenuOpen] = useState(false);
@@ -22,11 +23,7 @@ const Navbar = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleLogout = () => {
-    localStorage.clear();
-    navigate("/admin");
-  };
-
+  const handleLogout = useLogout();
   return (
     <nav className="bg-[#06296b] border-gray-200 relative z-50">
       <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">

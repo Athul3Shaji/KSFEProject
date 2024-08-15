@@ -5,7 +5,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FaUserCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { states, districts } from "./../data"; // Importing states and districts
+import { states, districts } from "./../data"; 
 
 const Enquiry = () => {
   const [formData, setFormData] = useState({

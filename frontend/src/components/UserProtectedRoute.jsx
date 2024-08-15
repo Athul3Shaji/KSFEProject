@@ -3,13 +3,14 @@ import { Navigate, Outlet } from "react-router-dom";
 
 const UserProtectedRoute = () => {
   const useAuth = () => {
-    const userToken = localStorage.getItem("userToken");
+    const userToken = localStorage.getItem("user_accesstoken");
     const userType = localStorage.getItem("userType");
-    return userToken && userType === "user";
+    return Boolean(userToken && userType === "user");
   };
+
   const auth = useAuth();
 
-  return auth ? <Outlet /> : <Navigate to="/" />;
+  return auth ? <Outlet /> : <Navigate to="/" replace />;
 };
 
 export default UserProtectedRoute;

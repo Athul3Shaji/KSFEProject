@@ -13,7 +13,19 @@ const AdminLogin = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (localStorage.getItem("admin_accestoken")) {
+    const handleUnload = () => {
+      localStorage.removeItem("accessToken");
+    };
+  
+    window.addEventListener("beforeunload", handleUnload);
+  
+    return () => {
+      window.removeEventListener("beforeunload", handleUnload);
+    };
+  }, []);
+  
+  useEffect(() => {
+    if (localStorage.getItem("accessToken")) {
       navigate("/adminhome");
     } else {
       navigate("/admin");
@@ -50,8 +62,8 @@ const AdminLogin = () => {
             toast.dismiss(currentToastId);
           }
 
-          if (data?.admin_accestoken) {
-            localStorage.setItem("admin_accestoken", data?.admin_accestoken);
+          if (data?.accessToken) {
+            localStorage.setItem("accessToken", data?.admin_accestoken);
             localStorage.setItem("userType", data?.user_type);
             localStorage.setItem("refreshToken", data?.refreshToken);
             navigate("/adminhome");
