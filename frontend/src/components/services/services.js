@@ -79,7 +79,7 @@ export async function fetchEmployees() {
     const response = await axios.get(`${API_URL}/admin/employee`);
     return response.data;
   } catch (error) {
-    console.error("Error fetching agents:", error);
+    console.error("Error fetching employee:", error);
     throw error;
   }
 }
@@ -91,7 +91,7 @@ export async function addEmployee(employeeData) {
     console.log(employeeData,"kkkkkkkkkkkk")
     return response.data;
   } catch (error) {
-    console.error("Error adding agent:", error);
+    console.error("Error adding employee:", error);
     throw error;
   }
 }
@@ -102,7 +102,7 @@ export async function updateEmployee(id, employeeData) {
     const response = await axios.put(`${API_URL}/admin/employee/${id}`, employeeData);
     return response.data;
   } catch (error) {
-    console.error("Error updating agent:", error);
+    console.error("Error updating employee:", error);
     throw error;
   }
 }
@@ -114,7 +114,53 @@ export async function deleteEmployee(id) {
     const response = await axios.delete(`${API_URL}/admin/employee/delete/${id}`);
     return response.data;
   } catch (error) {
-    console.error("Error deleting agent:", error);
+    console.error("Error deleting employee:", error);
+    throw error;
+  }
+}
+
+// Function to fetch all chitties
+export async function fetchChitty() {
+  try {
+    const response = await axios.get(`${API_URL}/admin/chitty`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching chitties:", error);
+    throw error;
+  }
+}
+
+// Function to add a new chitty
+export async function addChitty(chitttyData) {
+  try {
+    const response = await axios.post(`${API_URL}/admin/chitty/add`, chitttyData);
+    console.log(chitttyData,"kkkkkkkkkkkk")
+    return response.data;
+  } catch (error) {
+    console.error("Error adding chitty:", error);
+    throw error;
+  }
+}
+
+// Function to update an existing chitty
+export async function updateChitty(id, chitttyData) {
+  try {
+    const response = await axios.put(`${API_URL}/admin/chitty/${id}`, chitttyData);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating chitty:", error);
+    throw error;
+  }
+}
+
+// Function to delete an chitty (soft delete)
+export async function deleteChitty(id) {
+  try {
+    console.log(id);
+    const response = await axios.delete(`${API_URL}/admin/chitty/delete/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting chitty:", error);
     throw error;
   }
 }
