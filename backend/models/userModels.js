@@ -14,6 +14,9 @@ const User = sequelize.define('User', {
     mobile_number: {
         type: DataTypes.STRING,
         allowNull: false,
+        unique: {
+            msg: 'ERR_MOBILE_UNIQUE|Mobile already exists'
+        },
         validate: {
             notEmpty: {
                 msg: 'ERR_MOBILE_EMPTY|Mobile number cannot be empty'
@@ -85,8 +88,26 @@ const User = sequelize.define('User', {
             }
         }
     },
-    isDeleted :{
-        type:DataTypes.BOOLEAN,
+    reference_from: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    chitties: {
+        type: DataTypes.JSON, // Store multiple chitty data as JSON array
+        allowNull: false,
+        validate: {
+            notEmpty: {
+                msg: 'ERR_CHITTY_EMPTY|Chitty data cannot be empty'
+            },
+            isArray(value) { // Custom validator to check if the value is an array
+                if (!Array.isArray(value)) {
+                    throw new Error('ERR_CHITTY_NOT_ARRAY|Chitty data must be an array');
+                }
+            }
+        }
+    },
+    isDeleted: {
+        type: DataTypes.BOOLEAN,
         allowNull: false,
         defaultValue: false
     }

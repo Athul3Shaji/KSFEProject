@@ -23,6 +23,48 @@ const validateChitty = [
   ];
   
 
+  const validateUserRequest = [
+    body('name')
+        .notEmpty().withMessage('ERR_NAME_EMPTY|Name cannot be empty')
+        .isString().withMessage('ERR_NAME_NOT_STRING|Name must be a string'),
+    body('mobile_number')
+        .notEmpty().withMessage('ERR_MOBILE_EMPTY|Mobile number cannot be empty')
+        .isNumeric().withMessage('ERR_MOBILE_NOT_NUMERIC|Mobile number must be numeric')
+        .isLength({ min: 10, max: 15 }).withMessage('ERR_MOBILE_LENGTH|Mobile number must be between 10 and 15 characters'),
+    body('address')
+        .notEmpty().withMessage('ERR_ADDRESS_EMPTY|Address cannot be empty')
+        .isString().withMessage('ERR_ADDRESS_NOT_STRING|Address must be a string'),
+    body('email')
+        .notEmpty().withMessage('ERR_EMAIL_EMPTY|Email cannot be empty')
+        .isEmail().withMessage('ERR_EMAIL_INVALID|Email must be a valid email address'),
+    body('district')
+        .notEmpty().withMessage('ERR_DISTRICT_EMPTY|District cannot be empty')
+        .isString().withMessage('ERR_DISTRICT_NOT_STRING|District must be a string'),
+    body('state')
+        .notEmpty().withMessage('ERR_STATE_EMPTY|State cannot be empty')
+        .isString().withMessage('ERR_STATE_NOT_STRING|State must be a string'),
+    body('reference_from')
+        .optional() // Allow null or undefined
+        .isString().withMessage('ERR_REFERENCE_NOT_STRING|Reference must be a string'),
+    body('chitties')
+        .notEmpty().withMessage('ERR_CHITTY_EMPTY|Chitty data cannot be empty')
+        .isArray().withMessage('ERR_CHITTY_NOT_ARRAY|Chitty data must be an array'),
+    body('pin')
+        .notEmpty().withMessage('ERR_PIN_EMPTY|PIN cannot be empty')
+        .isNumeric().withMessage('ERR_PIN_NOT_NUMERIC|PIN must be numeric')
+        .isLength({ min: 6, max: 10 }).withMessage('ERR_PIN_LENGTH|PIN must be between 6 and 10 characters'),
+    (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            const errorResponse = errors.array().map(error => {
+                const [code, message] = error.msg.split('|');
+                return { code, message, field: error.param };
+            });
+            return res.status(400).json({ errors: errorResponse });
+        }
+        next();
+    }
+];
 
 
 
@@ -70,4 +112,4 @@ const validateAgent = (req, res, next) => {
     next();
 };
 
-module.exports ={validateEmployee,validateAgent,validateChitty}
+module.exports ={validateEmployee,validateAgent,validateChitty,validateUserRequest}
