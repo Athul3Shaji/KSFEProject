@@ -1,6 +1,6 @@
 const express = require('express')
 const cors = require('cors')
-const loginroute=require('./routes/loginroute')
+const loginroute=require('./routes/ksfeRoute')
 const app = express()
 const port = 8000
 
