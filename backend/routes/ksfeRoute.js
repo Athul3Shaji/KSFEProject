@@ -4,8 +4,8 @@ const {add_employee, get_employees, get_employee_by_id,update_employee, delete_e
 const router = express.Router()
 const { add_agent,get_agent_by_id,get_agents,update_agent,delete_agent } = require('../controller/agentController')
 const {add_chitty,get_chitty,get_chitty_by_id,delete_chitty,update_chitty} = require("../controller/chittyController")
-const {add_user} = require('../controller/userController')
-const {validateEmployee,validateAgent,validateChitty} =require('../middleware/validations')
+const {add_user, get_users, get_user_by_id, update_user, delete_user} = require('../controller/userController')
+const {validateEmployee,validateAgent,validateChitty,validateUserRequest} =require('../middleware/validations')
 
 // routes of login
 router.post('/user/login',user_login)
@@ -34,7 +34,15 @@ router.delete('/admin/chitty/delete/:id',delete_chitty)
 
 
 // routes of user
-router.post('/user/add',add_user)
+router.post('/user/add',validateUserRequest,add_user)
+router.get('/user',get_users)
+router.get('/user/:id',get_user_by_id)
+router.put('/user/update/:id',validateUserRequest,update_user)
+router.delete('/user/delete/:id',delete_user)
+
+
+
+
 
 
 
