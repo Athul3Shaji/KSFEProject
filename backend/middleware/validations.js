@@ -1,3 +1,31 @@
+const { body, validationResult } = require('express-validator');
+
+const validateChitty = [
+    body('chitty_code')
+      .exists({ checkFalsy: true }).withMessage('Chitty code is required')
+      .isLength({ min: 3, max: 20 }).withMessage('Chitty code must be between 3 and 20 characters long'),
+    
+    body('chitty_name')
+      .exists({ checkFalsy: true }).withMessage('Chitty name is required')
+      .isLength({ min: 3, max: 100 }).withMessage('Chitty name must be between 3 and 100 characters long'),
+  
+    body('chitty_tenure')
+      .exists({ checkFalsy: true }).withMessage('Chitty tenure is required')
+      .isInt({ min: 1, max: 120 }).withMessage('Chitty tenure must be an integer between 1 and 120'),
+  
+    body('per_month_emi')
+      .exists({ checkFalsy: true }).withMessage('Per month EMI is required')
+      .isFloat({ min: 0 }).withMessage('Per month EMI must be a non-negative number'),
+  
+    body('total_amount')
+      .exists({ checkFalsy: true }).withMessage('Total amount is required')
+      .isFloat({ min: 0 }).withMessage('Total amount must be a non-negative number')
+  ];
+  
+
+
+
+
 const validateEmployee = (req, res, next) => {
     const { employee_name, employee_code, employee_mobile,employee_email } = req.body;
 
@@ -42,4 +70,4 @@ const validateAgent = (req, res, next) => {
     next();
 };
 
-module.exports ={validateEmployee,validateAgent}
+module.exports ={validateEmployee,validateAgent,validateChitty}
