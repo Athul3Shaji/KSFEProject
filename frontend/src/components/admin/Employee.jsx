@@ -32,26 +32,36 @@ const Employee = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [sortConfig, setSortConfig] = useState({ key: "", direction: "" });
 
   const filteredEmployees = employees.filter((employee) => {
     const name = employee.name ? employee.name.toLowerCase() : "";
     const email = employee.email ? employee.email.toLowerCase() : "";
     const mobile = employee.mobile ? employee.mobile : "";
-  
+
     return (
       name.includes(searchTerm.toLowerCase()) ||
       mobile.includes(searchTerm) ||
       email.includes(searchTerm.toLowerCase())
     );
   });
-  
 
   const [currentPage, setCurrentPage] = useState(1);
   const employeesPerPage = 7;
 
   const indexOfLastEmployee = currentPage * employeesPerPage;
   const indexOfFirstEmployee = indexOfLastEmployee - employeesPerPage;
-  const currentEmployees = filteredEmployees.slice(
+  const sortedEmployees = [...filteredEmployees].sort((a, b) => {
+    if (sortConfig.key) {
+      const aValue = a[sortConfig.key]?.toString().toLowerCase() || "";
+      const bValue = b[sortConfig.key]?.toString().toLowerCase() || "";
+      if (aValue < bValue) return sortConfig.direction === "ascending" ? -1 : 1;
+      if (aValue > bValue) return sortConfig.direction === "ascending" ? 1 : -1;
+    }
+    return 0;
+  });
+
+  const currentEmployees = sortedEmployees.slice(
     indexOfFirstEmployee,
     indexOfLastEmployee
   );
@@ -84,6 +94,13 @@ const Employee = () => {
     };
   }, []);
 
+  const handleSort = (key) => {
+    let direction = "ascending";
+    if (sortConfig.key === key && sortConfig.direction === "ascending") {
+      direction = "descending";
+    }
+    setSortConfig({ key, direction });
+  };
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
@@ -108,7 +125,7 @@ const Employee = () => {
   const validateData = () => {
     let isValid = true;
     const errors = { name: "", code: "", mobile: "", email: "" };
-  
+
     if (!newEmployee.name || !newEmployee.name.trim()) {
       errors.name = "*Employee Name is required.";
       isValid = false;
@@ -135,11 +152,10 @@ const Employee = () => {
       errors.code = "*Employee code already exists.";
       isValid = false;
     }
-  
+
     setFormErrors(errors);
     return isValid;
   };
-  
 
   const handleAddEmployee = async (e) => {
     e.preventDefault();
@@ -163,7 +179,7 @@ const Employee = () => {
         setEmployees(updatedEmployees);
         toast.success("Employee updated successfully.");
       } else {
-        const response = await addEmployee(employeeData); 
+        const response = await addEmployee(employeeData);
         const newEmployeeWithId = { ...employeeData, id: response.id };
         setEmployees((prev) => [...prev, newEmployeeWithId]);
         toast.success("Employee added successfully.");
@@ -251,20 +267,47 @@ const Employee = () => {
           <table className="w-full text-sm text-left text-gray-700">
             <thead className="text-xs text-gray-100 uppercase bg-gradient-to-r from-[#7fb715] to-[#066769]">
               <tr>
-                <th scope="col" className="px-2 py-3">
-                  Employee ID
+                <th scope="col" className="px-2 py-3 cursor-pointer"
+                onClick={() => handleSort("id")}>
+                  Employee ID{" "}
+                  {sortConfig.key === "id" &&
+                    (sortConfig.direction === "ascending" ? "▲" : "▼")}
                 </th>
-                <th scope="col" className="px-6 py-3">
-                  Name
+                <th
+                  scope="col"
+                  className="px-6 py-3 cursor-pointer"
+                  onClick={() => handleSort("employee_name")}
+                >
+                  Name{" "}
+                  {sortConfig.key === "employee_name" &&
+                    (sortConfig.direction === "ascending" ? "▲" : "▼")}
                 </th>
-                <th scope="col" className="px-7 py-3">
-                  Employee Code
+                <th
+                  scope="col"
+                  className="px-7 py-3 cursor-pointer"
+                  onClick={() => handleSort("employee_code")}
+                >
+                  Employee Code{" "}
+                  {sortConfig.key === "employee_code" &&
+                    (sortConfig.direction === "ascending" ? "▲" : "▼")}
                 </th>
-                <th scope="col" className="px-11 py-3">
-                  Email
+                <th
+                  scope="col"
+                  className="px-11 py-3 cursor-pointer"
+                  onClick={() => handleSort("employee_email")}
+                >
+                  Email{" "}
+                  {sortConfig.key === "employee_email" &&
+                    (sortConfig.direction === "ascending" ? "▲" : "▼")}
                 </th>
-                <th scope="col" className="px-3 py-3">
-                  Mobile
+                <th
+                  scope="col"
+                  className="px-3 py-3 cursor-pointer"
+                  onClick={() => handleSort("employee_mobile")}
+                >
+                  Mobile{" "}
+                  {sortConfig.key === "employee_mobile" &&
+                    (sortConfig.direction === "ascending" ? "▲" : "▼")}
                 </th>
                 <th scope="col" className="px-3 py-3">
                   Action
@@ -496,7 +539,7 @@ const Employee = () => {
           </div>
         )}
       </div>
-      <ToastContainer position="top-center"/>
+      <ToastContainer position="top-center" />
     </>
   );
 };

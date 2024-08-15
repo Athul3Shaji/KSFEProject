@@ -16,7 +16,15 @@ import {
 const Chitty = () => {
   const [chitties, setChitties] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [sortConfig, setSortConfig] = useState({ key: "", direction: "" });
   const [newChitty, setNewChitty] = useState({
+    chitty_code: "",
+    chitty_name: "",
+    chitty_tenure: "",
+    per_month_emi: "",
+    total_amount: "",
+  });
+  const [formErrors, setFormErrors] = useState({
     chitty_code: "",
     chitty_name: "",
     chitty_tenure: "",
@@ -33,7 +41,7 @@ const Chitty = () => {
     const loadChitties = async () => {
       try {
         const response = await fetchChitty();
-        setChitties(response); // Assuming response is an array
+        setChitties(response);
       } catch (error) {
         toast.error("Failed to fetch chitties.");
       }
@@ -48,6 +56,7 @@ const Chitty = () => {
   };
 
   const validateData = () => {
+    let errors = {};
     const {
       chitty_code,
       chitty_name,
@@ -55,35 +64,32 @@ const Chitty = () => {
       per_month_emi,
       total_amount,
     } = newChitty;
+
     if (!chitty_code.trim()) {
-      toast.error("Chitty CODE cannot be empty.");
-      return false;
+      errors.chitty_code = "Chitty CODE cannot be empty.";
     }
     if (!chitty_name.trim()) {
-      toast.error("Chitty Name cannot be empty.");
-      return false;
+      errors.chitty_name = "Chitty Name cannot be empty.";
     }
-    if (!chitty_tenure.trim()) {
-      toast.error("Chitty Tenure cannot be empty.");
-      return false;
+    if (!chitty_tenure.toString().trim()) {
+      errors.chitty_tenure = "Chitty Tenure cannot be empty.";
     }
-    if (!per_month_emi.trim()) {
-      toast.error("Per Month EMI cannot be empty.");
-      return false;
+    if (!per_month_emi.toString().trim()) {
+      errors.per_month_emi = "Per Month EMI cannot be empty.";
     }
-    if (!total_amount.trim()) {
-      toast.error("Total Amount cannot be empty.");
-      return false;
+    if (!total_amount.toString().trim()) {
+      errors.total_amount = "Total Amount cannot be empty.";
     }
     if (
       chitties.some(
         (chitty) => chitty.chitty_code === chitty_code && !isEditMode
       )
     ) {
-      toast.error("Chitty CODE already exists.");
-      return false;
+      errors.chitty_code = "Chitty CODE already exists.";
     }
-    return true;
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const handleAddChitty = async (e) => {
@@ -92,7 +98,9 @@ const Chitty = () => {
 
     try {
       if (isEditMode) {
-        await updateChitty(newChitty);
+        await updateChitty(newChitty.id,newChitty);
+        console.log(newChitty.id,newChitty,"iiiiiiiiiiiiiiiiiiiiiiii");
+        
         const updatedChitties = chitties.map((chitty) =>
           chitty.id === editId ? newChitty : chitty
         );
@@ -115,6 +123,13 @@ const Chitty = () => {
     } catch (error) {
       toast.error("Failed to save chitty.");
     }
+  };
+  const handleSort = (key) => {
+    let direction = "ascending";
+    if (sortConfig.key === key && sortConfig.direction === "ascending") {
+      direction = "descending";
+    }
+    setSortConfig({ key, direction });
   };
 
   const handleEdit = (id) => {
@@ -157,14 +172,22 @@ const Chitty = () => {
     (chitty) =>
       chitty.chitty_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       chitty.chitty_code.toString().includes(searchTerm) ||
-      chitty.chitty_tenure
-        .toString()
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase())
+      chitty.chitty_tenure.toString().toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const totalPages = Math.ceil(filteredChitties.length / chittiesPerPage);
-  const displayedChitties = filteredChitties.slice(
+
+  const sortedChitties = [...filteredChitties].sort((a, b) => {
+    if (sortConfig.key) {
+      const aValue = a[sortConfig.key]?.toString().toLowerCase() || "";
+      const bValue = b[sortConfig.key]?.toString().toLowerCase() || "";
+      if (aValue < bValue) return sortConfig.direction === "ascending" ? -1 : 1;
+      if (aValue > bValue) return sortConfig.direction === "ascending" ? 1 : -1;
+    }
+    return 0;
+  });
+
+  const displayedChitties = sortedChitties.slice(
     (currentPage - 1) * chittiesPerPage,
     currentPage * chittiesPerPage
   );
@@ -226,11 +249,17 @@ const Chitty = () => {
             <table className="w-full text-sm text-left text-gray-700">
               <thead className="text-xs text-gray-100 uppercase bg-gradient-to-r from-[#7fb715] to-[#066769]">
                 <tr>
-                  <th scope="col" className="px-2 py-3">
-                    Chitty CODE
+                  <th scope="col" className="px-2 py-3 cursor-pointer"
+                onClick={() => handleSort("id")}>
+                  Chitty Code{" "}
+                  {sortConfig.key === "id" &&
+                    (sortConfig.direction === "ascending" ? "▲" : "▼")}
                   </th>
-                  <th scope="col" className="px-6 py-3">
-                    Chitty Name
+                  <th scope="col" className="px-6 cursor-pointer"
+                onClick={() => handleSort("chitty_name")}>
+                  Chitty Name{" "}
+                  {sortConfig.key === "chitty_name" &&
+                    (sortConfig.direction === "ascending" ? "▲" : "▼")}
                   </th>
                   <th scope="col" className="px-7 py-3">
                     Chitty Tenure
@@ -247,15 +276,17 @@ const Chitty = () => {
                 </tr>
               </thead>
               <tbody>
-                {displayedChitties.map((chitty) => (
+                {displayedChitties.map((chitty,index) => (
                   <tr
-                    key={chitty.id} // Use chitty.id here
-                    className="bg-white border-b text-gray-600"
+                    key={chitty.id} 
+                    className={`${
+                      index % 2 === 0 ? "bg-gray-200" : "bg-blue-50"
+                    } border-b`}
                   >
                     <td className="px-2 py-4">{chitty.chitty_code}</td>
-                    <td className="px-6 py-4">{chitty.chitty_name}</td>
-                    <td className="px-7 py-4">{chitty.chitty_tenure}</td>
-                    <td className="px-7 py-4">{chitty.per_month_emi}</td>
+                    <td className="px-7 py-4">{chitty.chitty_name}</td>
+                    <td className="px-10 py-4">{chitty.chitty_tenure}</td>
+                    <td className="px-10 py-4">{chitty.per_month_emi}</td>
                     <td className="px-7 py-4">{chitty.total_amount}</td>
                     <td className="px-3 py-4 flex gap-2">
                       <button
@@ -362,6 +393,11 @@ const Chitty = () => {
                       className="block w-full text-md text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-600 focus:border-blue-600 p-2.5"
                       disabled={isEditMode}
                     />
+                    {formErrors.chitty_code && (
+                      <p className="text-red-500 text-sm">
+                        {formErrors.chitty_code}
+                      </p>
+                    )}
                   </div>
                   <div className="col-span-2">
                     <label
@@ -378,6 +414,11 @@ const Chitty = () => {
                       onChange={handleInputChange}
                       className="block w-full text-md text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-600 focus:border-blue-600 p-2.5"
                     />
+                    {formErrors.chitty_name && (
+                      <p className="text-red-500 text-sm">
+                        {formErrors.chitty_name}
+                      </p>
+                    )}
                   </div>
                   <div className="col-span-1">
                     <label
@@ -394,6 +435,11 @@ const Chitty = () => {
                       onChange={handleInputChange}
                       className="block w-full text-md text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-600 focus:border-blue-600 p-2.5"
                     />
+                    {formErrors.chitty_tenure && (
+                      <p className="text-red-500 text-sm">
+                        {formErrors.chitty_tenure}
+                      </p>
+                    )}
                   </div>
                   <div className="col-span-2">
                     <label
@@ -410,6 +456,11 @@ const Chitty = () => {
                       onChange={handleInputChange}
                       className="block w-full text-md text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-600 focus:border-blue-600 p-2.5"
                     />
+                    {formErrors.per_month_emi && (
+                      <p className="text-red-500 text-sm">
+                        {formErrors.per_month_emi}
+                      </p>
+                    )}
                   </div>
                   <div className="col-span-2">
                     <label
@@ -426,6 +477,11 @@ const Chitty = () => {
                       onChange={handleInputChange}
                       className="block w-full text-md text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-600 focus:border-blue-600 p-2.5"
                     />
+                    {formErrors.total_amount && (
+                      <p className="text-red-500 text-sm">
+                        {formErrors.total_amount}
+                      </p>
+                    )}
                   </div>
                 </div>
                 <div className="flex justify-center">
@@ -440,7 +496,7 @@ const Chitty = () => {
             </div>
           </div>
         )}
-        <ToastContainer position="top-center"/>
+        <ToastContainer position="top-center" />
       </div>
     </>
   );

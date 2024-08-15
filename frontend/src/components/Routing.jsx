@@ -11,6 +11,7 @@ import About from "./user/About";
 import ChittyEnroll from "./admin/ChittyEnroll";
 import AdminProtectedRoute from "../components/AdminProtectedRoute";
 import UserProtectedRoute from "../components/UserProtectedRoute";
+import ErrorPage from "./ErrorPage";
 
 const Routing = () => {
   return (
@@ -36,6 +37,7 @@ const Routing = () => {
 
         {/* Common route */}
         <Route path="/about" element={<About />} />
+        <Route path="/*" element={<ErrorPage />} />
       </Routes>
     </Router>
   );

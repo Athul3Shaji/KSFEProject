@@ -145,7 +145,7 @@ export async function addChitty(chitttyData) {
 // Function to update an existing chitty
 export async function updateChitty(id, chitttyData) {
   try {
-    const response = await axios.put(`${API_URL}/admin/chitty/${id}`, chitttyData);
+    const response = await axios.put(`${API_URL}/admin/chitty/update/${id}`, chitttyData);
     return response.data;
   } catch (error) {
     console.error("Error updating chitty:", error);
