@@ -43,7 +43,7 @@ const Chitty = () => {
         const response = await fetchChitty();
         setChitties(response);
       } catch (error) {
-        toast.error("Failed to fetch chitties.");
+        toast.error("Failed to fetch chitties.", { toastId:"901"});
       }
     };
 
@@ -105,12 +105,12 @@ const Chitty = () => {
           chitty.id === editId ? newChitty : chitty
         );
         setChitties(updatedChitties);
-        toast.success("Chitty updated successfully.");
+        toast.success("Chitty updated successfully.", { toastId:"902"});
         setIsEditMode(false);
       } else {
         await addChitty(newChitty);
         setChitties((prev) => [...prev, newChitty]);
-        toast.success("Chitty added successfully.");
+        toast.success("Chitty added successfully.", { toastId:"903"});
       }
       setNewChitty({
         chitty_code: "",
@@ -121,7 +121,7 @@ const Chitty = () => {
       });
       setIsModalOpen(false);
     } catch (error) {
-      toast.error("Failed to save chitty.");
+      toast.error("Failed to save chitty.", { toastId:"904"});
     }
   };
   const handleSort = (key) => {
@@ -144,9 +144,9 @@ const Chitty = () => {
     try {
       await deleteChitty(id);
       setChitties((prev) => prev.filter((chitty) => chitty.id !== id));
-      toast.success("Chitty deleted successfully.");
+      toast.success("Chitty deleted successfully.", { toastId:"905"});
     } catch (error) {
-      toast.error("Failed to delete chitty.");
+      toast.error("Failed to delete chitty.", { toastId:"906"});
     }
   };
 
@@ -496,7 +496,7 @@ const Chitty = () => {
             </div>
           </div>
         )}
-        <ToastContainer position="top-center" />
+        <ToastContainer position="top-center" limit={1}/>
       </div>
     </>
   );

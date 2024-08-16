@@ -5,7 +5,8 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FaUserCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { states, districts } from "./../data"; 
+import { states, districts } from "./../data";
+import { fetchAgents, fetchChitty, fetchEmployees } from "../services/services";
 
 const Enquiry = () => {
   const [formData, setFormData] = useState({
@@ -17,19 +18,24 @@ const Enquiry = () => {
     state: "",
     pin: "",
     reference: "",
-    referenceDetail: "",
+    referenceDetail: null, // Update to handle object
     chitties: [],
   });
 
   const [errors, setErrors] = useState({});
-  const navigate = useNavigate();
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [availableDistricts, setAvailableDistricts] = useState([]);
   const dropdownRef = useRef(null);
-  const [gridColumns, setGridColumns] = useState("grid-cols-2"); 
+  const [gridColumns, setGridColumns] = useState("grid-cols-2");
 
-  //handle the signout modal
+  const [staffOptions, setStaffOptions] = useState([]);
+  const [agentOptions, setAgentOptions] = useState([]);
+  const [chittyOptions, setChittyOptions] = useState([]);
+
+  const navigate = useNavigate();
+  const toastIdRef = useRef(null);
+
   const handleClickOutside = (event) => {
     if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
       setShowDropdown(false);
@@ -43,50 +49,57 @@ const Enquiry = () => {
     };
   }, []);
 
-  const chittyOptions = [
-    {
-      value: "KGC-S1",
-      label:
-        "KSFE Galaxy Chit Series-1 (KGC-S1) (From April 2024 to June 2024)",
-    },
-    {
-      value: "KGC-S2",
-      label:
-        "KSFE Galaxy Chit Series-2 (KGC-S2) (From July 2024 to October 2024)",
-    },
-    {
-      value: "KGC-S3",
-      label:
-        "KSFE Galaxy Chit Series-3 (KGC-S3) (From November 2024 to February 2025)",
-    },
-  ];
+  useEffect(() => {
+    const fetchStaff = async () => {
+      try {
+        const response = await fetchEmployees();
+        const staffList = response?.map((staff) => ({
+          value: staff.id,
+          label: staff.employee_name,
+        }));
+        setStaffOptions(staffList);
+      } catch (error) {
+        showToast("Failed to fetch staff list.");
+      }
+    };
 
-  const staffOptions = [
-    { value: "", label: "Select Staff" },
-    { value: "John", label: "John Doe" },
-    { value: "James", label: "James Frence" },
-    { value: "Alice", label: "Alice George" },
-  ];
+    const fetchAgentsList = async () => {
+      try {
+        const response = await fetchAgents();
+        const agentsList = response?.map((agent) => ({
+          value: agent.id,
+          label: agent.agent_name,
+        }));
+        setAgentOptions(agentsList);
+      } catch (error) {
+        showToast("Failed to fetch agents list.");
+      }
+    };
 
-  const agentOptions = [
-    { value: "", label: "Select Agents" },
-    { value: "John", label: "John Doe" },
-    { value: "James", label: "James Frence" },
-    { value: "Alice", label: "Alice George" },
-  ];
+    const fetchChittiesList = async () => {
+      try {
+        const response = await fetchChitty();
+        const chittiesList = response?.map((chitty) => ({
+          value: chitty.id,
+          label: chitty.chitty_name,
+        }));
+        setChittyOptions(chittiesList);
+      } catch (error) {
+        showToast("Failed to fetch chitties list.");
+      }
+    };
 
-  const socialMedia = [
-    { value: "", label: "Select social media" },
-    { value: "whatsapp", label: "Whatsapp" },
-    { value: "facebook", label: "Facebook" },
-    { value: "Instagram", label: "Instagram" },
-  ];
+    fetchStaff();
+    fetchAgentsList();
+    fetchChittiesList();
+  }, []);
 
-  const directOptions = [
-    { value: "", label: "Select direct method" },
-    { value: "visit", label: "Visit" },
-    { value: "call", label: "Call" },
-  ];
+  const showToast = (message) => {
+    if (toastIdRef.current) {
+      toast.dismiss(toastIdRef.current);
+    }
+    toastIdRef.current = toast(message);
+  };
 
   const validate = () => {
     let formErrors = {};
@@ -97,14 +110,12 @@ const Enquiry = () => {
     if (!formData.state) formErrors.state = "*State is required";
     if (!formData.pin) formErrors.pin = "*PIN is required";
     if (!formData.reference) formErrors.reference = "*Reference is required";
-    if (formData.reference === "agent" && !formData.referenceDetail)
-      formErrors.referenceDetail = "*Agent name is required";
-    if (formData.reference === "staff" && !formData.referenceDetail)
-      formErrors.referenceDetail = "*Staff selection is required";
-    if (formData.reference === "socialmedia" && !formData.referenceDetail)
-      formErrors.referenceDetail = "*Social media platform is required";
-    if (formData.reference === "direct" && !formData.referenceDetail)
-      formErrors.referenceDetail = "*Direct contact method is required";
+    if (
+      (formData.reference === "agent" || formData.reference === "staff" ||
+      formData.reference === "socialmedia" || formData.reference === "direct") &&
+      !formData.referenceDetail
+    )
+      formErrors.referenceDetail = "*Reference detail is required";
     if (formData.chitties.length === 0)
       formErrors.chitties = "*At least one chitty must be selected";
     return formErrors;
@@ -113,23 +124,44 @@ const Enquiry = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-
-    // Update districts based on selected state
+  
+    // Clear error for the specific field being corrected
+    if (errors[name]) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        [name]: ""
+      }));
+    }
+  
     if (name === "state") {
       const stateIndex = states.indexOf(value);
       setAvailableDistricts(districts[stateIndex] || []);
       setFormData((prevState) => ({
         ...prevState,
-        district: "", // Reset district when state changes
+        district: "",
       }));
     }
   };
-
+  
   const handleReferenceChange = (e) => {
     const { value } = e.target;
-    setFormData({ ...formData, reference: value, referenceDetail: "" });
+    setFormData({ ...formData, reference: value, referenceDetail: null });
+  
+    // Clear reference-related errors
+    if (errors.reference) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        reference: "",
+      }));
+    }
+    if (errors.referenceDetail) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        referenceDetail: "",
+      }));
+    }
   };
-
+  
   const handleChittyChange = (selectedOptions) => {
     setFormData((prevState) => ({
       ...prevState,
@@ -139,12 +171,25 @@ const Enquiry = () => {
     }));
   };
 
+  const handleReferenceDetailChange = (option) => {
+    setFormData((prevState) => ({
+      ...prevState,
+      referenceDetail: option || null, // Set the selected option object
+    }));
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const formErrors = validate();
     if (Object.keys(formErrors).length === 0) {
-      console.log(formData,"datassssssssssss");
-      toast.success("Details added successfully!");
+      const submissionData = {
+        ...formData,
+        referenceDetail: formData.referenceDetail?.label 
+      }
+
+      console.log(submissionData, "----------------");
+      showToast("Details added successfully!");
+      
       setIsSubmitted(true);
       setFormData({
         name: "",
@@ -155,14 +200,15 @@ const Enquiry = () => {
         state: "",
         pin: "",
         reference: "",
-        referenceDetail: "",
+        referenceDetail: null,
         chitties: [],
       });
-      setErrors({});
+      setErrors({}); // Clear errors
     } else {
       setErrors(formErrors);
     }
   };
+  
 
   const handleSignOut = () => {
     localStorage.clear();
@@ -275,18 +321,13 @@ const Enquiry = () => {
                   Email
                 </label>
                 <input
-                  className={`w-full bg-gray-100 text-gray-900 p-3 rounded-lg focus:outline-none focus:shadow-outline ${
-                    errors.email ? "border-red-500" : ""
-                  }`}
+                  className="w-full bg-gray-100 text-gray-900 p-3 rounded-lg focus:outline-none focus:shadow-outline"
                   type="email"
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="Email"
                 />
-                {errors.email && (
-                  <p className="text-red-500 text-sm mt-1">{errors.email}</p>
-                )}
               </div>
 
               <div>
@@ -297,16 +338,16 @@ const Enquiry = () => {
                   State<sup className="text-red-500">*</sup>
                 </label>
                 <select
-                  className={`w-full bg-gray-100 text-gray-900 p-3 rounded-lg focus:outline-none focus:shadow-outline ${
-                    errors.state ? "border-red-500" : ""
-                  }`}
                   name="state"
                   value={formData.state}
                   onChange={handleChange}
+                  className={`w-full bg-gray-100 text-gray-900 p-3 rounded-lg focus:outline-none focus:shadow-outline ${
+                    errors.state ? "border-red-500" : ""
+                  }`}
                 >
-                  <option value="">Select State*</option>
-                  {states.map((state) => (
-                    <option key={state} value={state}>
+                  <option value="">Select State</option>
+                  {states.map((state, index) => (
+                    <option key={index} value={state}>
                       {state}
                     </option>
                   ))}
@@ -324,16 +365,16 @@ const Enquiry = () => {
                   District<sup className="text-red-500">*</sup>
                 </label>
                 <select
-                  className={`w-full bg-gray-100 text-gray-900 p-3 rounded-lg focus:outline-none focus:shadow-outline ${
-                    errors.district ? "border-red-500" : ""
-                  }`}
                   name="district"
                   value={formData.district}
                   onChange={handleChange}
+                  className={`w-full bg-gray-100 text-gray-900 p-3 rounded-lg focus:outline-none focus:shadow-outline ${
+                    errors.district ? "border-red-500" : ""
+                  }`}
                 >
-                  <option value="">Select District*</option>
-                  {availableDistricts.map((district) => (
-                    <option key={district} value={district}>
+                  <option value="">Select District</option>
+                  {availableDistricts.map((district, index) => (
+                    <option key={index} value={district}>
                       {district}
                     </option>
                   ))}
@@ -342,149 +383,172 @@ const Enquiry = () => {
                   <p className="text-red-500 text-sm mt-1">{errors.district}</p>
                 )}
               </div>
-            </div>
 
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-3 mt-5">
-  <div>
-    <label className="block text-gray-700 font-bold mb-2" htmlFor="pin">
-      PIN<sup className="text-red-500">*</sup>
-    </label>
-    <input
-      className={`w-full bg-gray-100 text-gray-900 p-3 rounded-lg focus:outline-none focus:shadow-outline ${
-        errors.pin ? "border-red-500" : ""
-      }`}
-      type="text"
-      name="pin"
-      value={formData.pin}
-      onChange={handleChange}
-      placeholder="PIN*"
-    />
-    {errors.pin && <p className="text-red-500 text-sm mt-1">{errors.pin}</p>}
-  </div>
-
-  <div>
-    <label className="block text-gray-700 font-bold mb-2" htmlFor="reference">
-      Reference<sup className="text-red-500">*</sup>
-    </label>
-    <select
-      className={`w-full bg-gray-100 text-gray-900 p-3 rounded-lg focus:outline-none focus:shadow-outline ${
-        errors.reference ? "border-red-500" : ""
-      }`}
-      name="reference"
-      value={formData.reference}
-      onChange={handleReferenceChange}
-    >
-      <option value="">Select Reference*</option>
-      <option value="agent">Agent</option>
-      <option value="staff">Staff</option>
-      <option value="socialmedia">Social Media</option>
-      <option value="direct">Direct</option>
-    </select>
-    {errors.reference && (
-      <p className="text-red-500 text-sm mt-1">{errors.reference}</p>
-    )}
-  </div>
-
-  {/* Reference Detail Section */}
-  <div>
-    <label className="block text-gray-700 font-bold mb-2" htmlFor="referenceDetail">
-      Reference Detail
-    </label>
-    {formData.reference ? (
-      <select
-        className={`w-full bg-gray-100 text-gray-900 p-3 rounded-lg focus:outline-none focus:shadow-outline ${
-          errors.referenceDetail ? "border-red-500" : "border-gray-300"
-        }`}
-        name="referenceDetail"
-        value={formData.referenceDetail}
-        onChange={(e) =>
-          setFormData({
-            ...formData,
-            referenceDetail: e.target.value,
-          })
-        }
-      >
-        {formData.reference === "agent" && agentOptions.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-        {formData.reference === "socialmedia" && socialMedia.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-        {formData.reference === "direct" && directOptions.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-        {formData.reference === "staff" && staffOptions.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-    ) : (
-      <input
-        className={`w-full bg-gray-100 text-gray-900 p-3 rounded-lg focus:outline-none focus:shadow-outline ${
-          errors.referenceDetail ? "border-red-500" : "border-gray-300"
-        }`}
-        type="text"
-        name="referenceDetail"
-        placeholder="Select Reference"
-        disabled
-        value={formData.referenceDetail}
-        onChange={(e) =>
-          setFormData({
-            ...formData,
-            referenceDetail: e.target.value,
-          })
-        }
-      />
-    )}
-    {errors.referenceDetail && (
-      <p className="text-red-500 text-sm mt-1">{errors.referenceDetail}</p>
-    )}
-  </div>
-</div>
-
-
-            <div className="mt-5">
-              <label
-                className="block text-gray-700 font-bold mb-2"
-                htmlFor="chitties"
-              >
-                Select Chitty<sup className="text-red-500">*</sup>
-              </label>
-              <Select
-                isMulti
-                name="chitties"
-                value={chittyOptions.filter((option) =>
-                  formData.chitties.includes(option.value)
+              <div>
+                <label
+                  className="block text-gray-700 font-bold mb-2"
+                  htmlFor="pin"
+                >
+                  PIN<sup className="text-red-500">*</sup>
+                </label>
+                <input
+                  className={`w-full bg-gray-100 text-gray-900 p-3 rounded-lg focus:outline-none focus:shadow-outline ${
+                    errors.pin ? "border-red-500" : ""
+                  }`}
+                  type="text"
+                  name="pin"
+                  value={formData.pin}
+                  onChange={handleChange}
+                  placeholder="PIN*"
+                />
+                {errors.pin && (
+                  <p className="text-red-500 text-sm mt-1">{errors.pin}</p>
                 )}
-                onChange={handleChittyChange}
-                options={chittyOptions}
-                className={`${errors.chitties ? "border-red-500" : ""}`}
-                placeholder="Select Chitty*"
-              />
-              {errors.chitties && (
-                <p className="text-red-500 text-sm mt-1">{errors.chitties}</p>
-              )}
-            </div>
+              </div>
 
-            <div className="col-span-2 w-full flex justify-center mt-5">
-              <button
-                type="submit"
-                className="uppercase text-sm font-bold tracking-wide bg-gradient-to-r from-[#7fb715] to-[#066769] text-gray-100 p-3 rounded-lg w-full max-w-xs focus:outline-none focus:shadow-outline"
-              >
-                Save
-              </button>
+              <div>
+                <label
+                  className="block text-gray-700 font-bold mb-2"
+                  htmlFor="reference"
+                >
+                  Reference<sup className="text-red-500">*</sup>
+                </label>
+                <select
+                  name="reference"
+                  value={formData.reference}
+                  onChange={handleReferenceChange}
+                  className={`w-full bg-gray-100 text-gray-900 p-3 rounded-lg focus:outline-none focus:shadow-outline ${
+                    errors.reference ? "border-red-500" : ""
+                  }`}
+                >
+                  <option value="">Select Reference</option>
+                  <option value="agent">Agent</option>
+                  <option value="staff">Staff</option>
+                  <option value="socialmedia">Social Media</option>
+                  <option value="direct">Direct</option>
+                </select>
+                {errors.reference && (
+                  <p className="text-red-500 text-sm mt-1">{errors.reference}</p>
+                )}
+              </div>
+
+              {formData.reference && (
+                <div>
+                <label
+                  className="block text-gray-700 font-bold mb-2"
+                  htmlFor="referenceDetail"
+                >
+                  Reference Detail<sup className="text-red-500">*</sup>
+                </label>
+                <Select
+                  value={formData.referenceDetail}
+                  onChange={handleReferenceDetailChange}
+                  options={
+                    formData.reference === "agent"
+                      ? agentOptions
+                      : formData.reference === "staff"
+                      ? staffOptions
+                      : formData.reference === "socialmedia"
+                      ? [
+                          { value: "Facebook", label: "Facebook" },
+                          { value: "Twitter", label: "Twitter" },
+                          { value: "Instagram", label: "Instagram" },
+                          { value: "LinkedIn", label: "LinkedIn" },
+                        ]
+                      : formData.reference === "direct"
+                      ? [
+                          { value: "visit", label: "Visit" },
+                          { value: "call", label: "Call" },
+                        ]
+                      : []
+                  }
+                  placeholder="Select Detail"
+                  className={`basic-single bg-gray-100 ${
+                    errors.referenceDetail ? "border-red-500" : ""
+                  }`}
+                  classNamePrefix="select"
+                  styles={{
+                    control: (provided, state) => ({
+                      ...provided,
+                      backgroundColor: "#f7fafc", // Tailwind `bg-gray-100`
+                      color: "#1a202c", // Tailwind `text-gray-900`
+                      padding: "0.3rem", // Tailwind `p-3`
+                      borderRadius: "0.75rem", // Tailwind `rounded-lg`
+                      borderColor: errors.referenceDetail
+                        ? "#f56565" // Tailwind `border-red-500`
+                        : state.isFocused
+                        ? "#63b3ed" // Tailwind `focus:border-blue-400`
+                        : "#e2e8f0", // Tailwind `border-gray-300`
+                      boxShadow: state.isFocused ? "0 0 0 3px rgba(66, 153, 225, 0.5)" : null, // Tailwind `focus:shadow-outline`
+                      "&:hover": {
+                        borderColor: errors.referenceDetail
+                          ? "#f56565" // Tailwind `hover:border-red-500`
+                          : "#a0aec0", // Tailwind `hover:border-gray-400`
+                      },
+                    }),
+                    menu: (provided) => ({
+                      ...provided,
+                      borderRadius: "0.75rem", // Tailwind `rounded-lg`
+                      boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)", // Tailwind `shadow-sm`
+                      backgroundColor: "#ffffff", // Tailwind `bg-white`
+                    }),
+                    option: (provided, state) => ({
+                      ...provided,
+                      backgroundColor: state.isSelected
+                        ? "#3182ce" // Tailwind `bg-blue-500`
+                        : state.isFocused
+                        ? "#ebf8ff" // Tailwind `bg-blue-100`
+                        : "#ffffff", // Tailwind `bg-white`
+                      color: state.isSelected ? "#ffffff" : "#1a202c", // Tailwind `text-white` or `text-gray-900`
+                    }),
+                  }}
+                />
+                {errors.referenceDetail && (
+                  <p className="text-red-500 text-sm mt-1">{errors.referenceDetail}</p>
+                )}
+              </div>
+              
+              )}
+
+              <div className="col-span-2 row-span-2">
+                <label
+                  className="block text-gray-700 font-bold mb-2"
+                  htmlFor="chitties"
+                >
+                  Chitties<sup className="text-red-500">*</sup>
+                </label>
+                <Select
+                  isMulti
+                  value={formData.chitties.map((chittyId) =>
+                    chittyOptions.find((option) => option.value === chittyId)
+                  )}
+                  onChange={handleChittyChange}
+                  options={chittyOptions}
+                  placeholder="Select Chitties"
+                  className={`basic-multi-select ${
+                    errors.chitties ? "border-red-500" : ""
+                  }`}
+                  classNamePrefix="select"
+                />
+                {errors.chitties && (
+                  <p className="text-red-500 text-sm mt-1">{errors.chitties}</p>
+                )}
+              </div>
+
+              <div className="col-span-2 w-full flex justify-center mt-5">
+                <button
+                  type="submit"
+                  className="uppercase text-sm font-bold tracking-wide bg-gradient-to-r from-[#7fb715] to-[#066769] text-gray-100 p-3
+                   rounded-lg w-full max-w-xs focus:outline-none focus:shadow-outline"
+                >
+                  Submit
+                </button>
+              </div>
             </div>
-            <ToastContainer position="top-center"/>
           </form>
         </div>
       </div>
+      <ToastContainer position="top-center"/>
     </div>
   );
 };

@@ -53,7 +53,7 @@ export async function addAgent(agentData) {
 // Function to update an existing agent
 export async function updateAgent(id, agentData) {
   try {
-    const response = await axios.put(`${API_URL}/admin/agent/${id}`, agentData);
+    const response = await axios.put(`${API_URL}/admin/agent/update/${id}`, agentData);
     return response.data;
   } catch (error) {
     console.error("Error updating agent:", error);
@@ -64,7 +64,7 @@ export async function updateAgent(id, agentData) {
 // Function to delete an agent (soft delete)
 export async function deleteAgent(id) {
   try {
-    const response = await axios.delete(`${API_URL}/admin/agent/${id}`);
+    const response = await axios.delete(`${API_URL}/admin/agent/delete/${id}`);
     return response.data;
   } catch (error) {
     console.error("Error deleting agent:", error);
@@ -99,7 +99,7 @@ export async function addEmployee(employeeData) {
 // Function to update an existing employee
 export async function updateEmployee(id, employeeData) {
   try {
-    const response = await axios.put(`${API_URL}/admin/employee/${id}`, employeeData);
+    const response = await axios.put(`${API_URL}/admin/employee/update/${id}`, employeeData);
     return response.data;
   } catch (error) {
     console.error("Error updating employee:", error);
@@ -161,6 +161,18 @@ export async function deleteChitty(id) {
     return response.data;
   } catch (error) {
     console.error("Error deleting chitty:", error);
+    throw error;
+  }
+}
+
+
+// Function to fetch all usersdata
+export async function fetchUsers() {
+  try {
+    const response = await axios.get(`${API_URL}/admin/users`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching chitties:", error);
     throw error;
   }
 }

@@ -1,129 +1,61 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "../Navbar";
 import Select from "react-select";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { MdPictureAsPdf } from "react-icons/md";
-
-const chittiesList = [
-  { label: "All", value: "ALL" },
-  {
-    label: "KSFE Galaxy Chit Series-1 (KGC-S1) (From April 2024 to June 2024)",
-    value: "KGC-S1",
-  },
-  {
-    label:
-      "KSFE Galaxy Chit Series-2 (KGC-S2) (From July 2024 to October 2024)",
-    value: "KGC-S2",
-  },
-  {
-    label:
-      "KSFE Galaxy Chit Series-3 (KGC-S3) (From November 2024 to February 2025)",
-    value: "KGC-S3",
-  },
-  // Add more chitties here
-];
+import { fetchChitty, fetchUsers } from "../services/services";
 
 const ChittyEnroll = () => {
+  const [chittiesList, setChittiesList] = useState([]);
   const [selectedChitty, setSelectedChitty] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [employees, setEmployees] = useState([
-    {
-      id: "E001",
-      name: "John Doe",
-      mobile: "1234567890",
-      email: "john.doe@example.com",
-      chitty: "KSFE Galaxy Chit Series-1 (KGC-S1) (From April 2024 to June 2024)",
-    },
-    {
-      id: "E002",
-      name: "Jane Smith",
-      mobile: "0987654321",
-      email: "jane.smith@example.com",
-      chitty: "KSFE Galaxy Chit Series-2 (KGC-S2) (From July 2024 to October 2024)",
-    },
-    {
-      id: "E003",
-      name: "Michael Johnson",
-      mobile: "1122334455",
-      email: "michael.johnson@example.com",
-      chitty: "KSFE Galaxy Chit Series-3 (KGC-S3) (From November 2024 to February 2025)",
-    },
-    {
-      id: "E004",
-      name: "Emily Davis",
-      mobile: "2233445566",
-      email: "emily.davis@example.com",
-      chitty: "KSFE Galaxy Chit Series-1 (KGC-S1) (From April 2024 to June 2024)",
-    },
-    {
-      id: "E005",
-      name: "Chris Brown",
-      mobile: "3344556677",
-      email: "chris.brown@example.com",
-      chitty: "KSFE Galaxy Chit Series-2 (KGC-S2) (From July 2024 to October 2024)",
-    },
-    {
-      id: "E006",
-      name: "Jessica Williams",
-      mobile: "4455667788",
-      email: "jessica.williams@example.com",
-      chitty: "KSFE Galaxy Chit Series-3 (KGC-S3) (From November 2024 to February 2025)",
-    },
-    {
-      id: "E007",
-      name: "Matthew Jones",
-      mobile: "5566778899",
-      email: "matthew.jones@example.com",
-      chitty: "KSFE Galaxy Chit Series-1 (KGC-S1) (From April 2024 to June 2024)",
-    },
-    {
-      id: "E008",
-      name: "Olivia Garcia",
-      mobile: "6677889900",
-      email: "olivia.garcia@example.com",
-      chitty: "KSFE Galaxy Chit Series-2 (KGC-S2) (From July 2024 to October 2024)",
-    },
-    {
-      id: "E009",
-      name: "Daniel Martinez",
-      mobile: "7788990011",
-      email: "daniel.martinez@example.com",
-      chitty: "KSFE Galaxy Chit Series-3 (KGC-S3) (From November 2024 to February 2025)",
-    },
-    {
-      id: "E010",
-      name: "Sophia Wilson",
-      mobile: "8899001122",
-      email: "sophia.wilson@example.com",
-      chitty: "KSFE Galaxy Chit Series-1 (KGC-S1) (From April 2024 to June 2024)",
-    },
-    {
-      id: "E011",
-      name: "Andrew Lee",
-      mobile: "9900112233",
-      email: "andrew.lee@example.com",
-      chitty: "KSFE Galaxy Chit Series-2 (KGC-S2) (From July 2024 to October 2024)",
-    },
-    {
-      id: "E012",
-      name: "Isabella Anderson",
-      mobile: "0011223344",
-      email: "isabella.anderson@example.com",
-      chitty: "KSFE Galaxy Chit Series-3 (KGC-S3) (From November 2024 to February 2025)",
-    },
-  ]);
+  const [users, setUsers] = useState([]);
 
-  const employeesPerPage = 7;
+  useEffect(() => {
+    const loadChittiesAndUsers = async () => {
+      try {
+        const chittiesResponse = await fetchChitty();
+        // const usersResponse = await fetchUsers();
 
-  const filteredEmployees = employees
-    .filter((employee) =>
-      employee.name.toLowerCase().includes(searchTerm.toLowerCase())
+        const usersResponse = [
+          {
+            id: "E009",
+            name: "Daniel Martinez",
+            mobile: "7788990011",
+            email: "daniel.martinez@example.com",
+            chitty:
+              "KSFE Galaxy Chit Series-3 (KGC-S3) (From November 2024 to February 2025)",
+          },
+        ];
+        
+        setChittiesList([
+          { label: "All", value: "ALL" },
+          ...chittiesResponse.map((chitty) => ({
+            
+            label: chitty.chitty_name,
+            value: chitty.id,
+          })),
+        ]);
+        setUsers(usersResponse);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    loadChittiesAndUsers();
+  }, []);
+
+  const usersPerPage = 7;
+
+  const filteredUsers = users
+    .filter((user) =>
+      user.name.toLowerCase().includes(searchTerm.toLowerCase())
     )
-    .filter((employee) =>
+    .filter((user) =>
       selectedChitty && selectedChitty.value !== "ALL"
-        ? employee.chitty === selectedChitty.label
+        ? user.chitty === selectedChitty.label
         : true
     );
 
@@ -139,29 +71,26 @@ const ChittyEnroll = () => {
     const doc = new jsPDF();
     doc.text("Chitty Enrollment List", 20, 10);
     doc.autoTable({
-      head: [["Employee ID", "Name", "Mobile", "Email"]],
-      body: filteredEmployees.map((emp) => [
-        emp.id,
-        emp.name,
-        emp.mobile,
-        emp.email,
+      head: [["User ID", "Name", "Mobile", "Email"]],
+      body: filteredUsers.map((user) => [
+        user.id,
+        user.name,
+        user.mobile,
+        user.email,
       ]),
     });
-    doc.save("chitty_enrollment_list.pdf");
+    doc.save("chitty enrollment.pdf");
   };
 
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
   };
 
-  const indexOfLastEmployee = currentPage * employeesPerPage;
-  const indexOfFirstEmployee = indexOfLastEmployee - employeesPerPage;
-  const currentEmployees = filteredEmployees.slice(
-    indexOfFirstEmployee,
-    indexOfLastEmployee
-  );
+  const indexOfLastUser = currentPage * usersPerPage;
+  const indexOfFirstUser = indexOfLastUser - usersPerPage;
+  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
-  const totalPages = Math.ceil(filteredEmployees.length / employeesPerPage);
+  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
 
   const handlePrevPage = () => {
     if (currentPage > 1) {
@@ -200,6 +129,7 @@ const ChittyEnroll = () => {
                 placeholder="Select a Chitty"
                 value={selectedChitty}
               />
+
               <button
                 onClick={handleExportPDF}
                 className="flex items-center justify-center bg-[#252eb1] text-gray-100 font-semibold py-2 px-6 rounded-lg hover:opacity-90"
@@ -211,7 +141,7 @@ const ChittyEnroll = () => {
         </div>
 
         <div className="relative overflow-x-auto shadow-md sm:rounded-lg w-3/5 my-8">
-          {filteredEmployees.length === 0 ? (
+          {filteredUsers.length === 0 ? (
             <div className="text-center py-4 text-gray-500">
               No records found
             </div>
@@ -221,7 +151,7 @@ const ChittyEnroll = () => {
                 <thead className="text-xs text-gray-100 uppercase bg-gradient-to-r from-[#7fb715] to-[#066769]">
                   <tr>
                     <th scope="col" className="px-2 py-3">
-                      Employee ID
+                      User ID
                     </th>
                     <th scope="col" className="px-6 py-3">
                       Name
@@ -235,7 +165,7 @@ const ChittyEnroll = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {currentEmployees.map((employee, index) => (
+                  {currentUsers.map((user, index) => (
                     <tr
                       key={index}
                       className={
@@ -244,10 +174,10 @@ const ChittyEnroll = () => {
                           : "bg-gray-200 border-b"
                       }
                     >
-                      <td className="px-2 py-3 text-gray-900">{employee.id}</td>
-                      <td className="px-6 py-3">{employee.name}</td>
-                      <td className="px-7 py-3">{employee.mobile}</td>
-                      <td className="px-11 py-3">{employee.email}</td>
+                      <td className="px-2 py-3 text-gray-900">{user.id}</td>
+                      <td className="px-6 py-3">{user.name}</td>
+                      <td className="px-7 py-3">{user.mobile}</td>
+                      <td className="px-11 py-3">{user.email}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -256,7 +186,7 @@ const ChittyEnroll = () => {
           )}
         </div>
 
-        {filteredEmployees.length > employeesPerPage && (
+        {filteredUsers.length > usersPerPage && (
           <div className="w-3/5 px-4">
             <div className="flex justify-between items-center">
               <button
