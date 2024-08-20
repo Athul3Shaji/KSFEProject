@@ -35,15 +35,15 @@ const validateChitty = [
         .notEmpty().withMessage('ERR_ADDRESS_EMPTY|Address cannot be empty')
         .isString().withMessage('ERR_ADDRESS_NOT_STRING|Address must be a string'),
     body('email')
-        .notEmpty().withMessage('ERR_EMAIL_EMPTY|Email cannot be empty')
-        .isEmail().withMessage('ERR_EMAIL_INVALID|Email must be a valid email address'),
+    .exists({ checkFalsy: false }).withMessage('Chitty name is required'),
+
     body('district')
         .notEmpty().withMessage('ERR_DISTRICT_EMPTY|District cannot be empty')
         .isString().withMessage('ERR_DISTRICT_NOT_STRING|District must be a string'),
     body('state')
         .notEmpty().withMessage('ERR_STATE_EMPTY|State cannot be empty')
         .isString().withMessage('ERR_STATE_NOT_STRING|State must be a string'),
-    body('reference_from')
+    body('reference')
         .optional() // Allow null or undefined
         .isString().withMessage('ERR_REFERENCE_NOT_STRING|Reference must be a string'),
     body('chitties')
