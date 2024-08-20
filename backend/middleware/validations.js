@@ -35,8 +35,8 @@ const validateChitty = [
         .notEmpty().withMessage('ERR_ADDRESS_EMPTY|Address cannot be empty')
         .isString().withMessage('ERR_ADDRESS_NOT_STRING|Address must be a string'),
     body('email')
-        .notEmpty().withMessage('ERR_EMAIL_EMPTY|Email cannot be empty')
-        .isEmail().withMessage('ERR_EMAIL_INVALID|Email must be a valid email address'),
+    .exists({ checkFalsy: false }).withMessage('Chitty name is required'),
+
     body('district')
         .notEmpty().withMessage('ERR_DISTRICT_EMPTY|District cannot be empty')
         .isString().withMessage('ERR_DISTRICT_NOT_STRING|District must be a string'),

@@ -1,5 +1,5 @@
 const { DataTypes } = require('sequelize');
-const sequelize = require('../config/db'); // Adjust the path to your database configuration
+const {sequelize} = require('../config/db'); // Adjust the path to your database configuration
 
 const User = sequelize.define('User', {
     name: {
@@ -41,7 +41,7 @@ const User = sequelize.define('User', {
     },
     email: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull:true,
         unique: {
             msg: 'ERR_EMAIL_UNIQUE|Email already exists'
         },
@@ -83,8 +83,8 @@ const User = sequelize.define('User', {
                 msg: 'ERR_PIN_NOT_NUMERIC|PIN must be numeric'
             },
             len: {
-                args: [6, 10],
-                msg: 'ERR_PIN_LENGTH|PIN must be between 6 and 10 characters'
+                args: [6, 6],
+                msg: 'ERR_PIN_LENGTH|PIN must be  6  characters'
             }
         }
     },

@@ -130,5 +130,9 @@ const delete_chitty = async (req, res) => {
 };
 
 
+chitty_filter = async(req,res)=>{
+    
+}
+
 
 module.exports ={add_chitty,get_chitty,get_chitty_by_id,update_chitty,delete_chitty}

@@ -1,4 +1,6 @@
 const User = require('../models/userModels');
+const { Op, sequelize,Sequelize } = require('sequelize');
+
 
 
 const add_user = async (req, res) => {
@@ -121,4 +123,30 @@ const delete_user = async (req, res) => {
 };
 
 
-module.exports = {add_user,get_user_by_id,get_users,update_user,delete_user}
+const chitty_filter = async (req, res) => {
+    try {
+        const { chittyIds } = req.query; // Assume chittyIds is passed as a query parameter
+
+        if (!chittyIds) {
+            return res.status(400).json({ error: 'chittyIds query parameter is required.' });
+        }
+
+        // Use sequelize.literal with the correct instance
+        const users = await User.findAll({
+            where: {
+                isDeleted: false,
+                [Sequelize.Op.and]: Sequelize.literal(`JSON_CONTAINS(chitties, '${chittyIds}')`)
+            },
+            order: [['createdAt', 'DESC']]
+        });
+
+        return res.json(users);
+    } catch (error) {
+        console.error('Error searching users by chitties:', error);
+        return res.status(500).json({ error: 'An error occurred while searching for users.' });
+    }
+}
+
+
+
+module.exports = {add_user,get_user_by_id,get_users,update_user,delete_user,chitty_filter}
