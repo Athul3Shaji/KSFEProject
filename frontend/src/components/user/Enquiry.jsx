@@ -620,7 +620,7 @@ const Enquiry = () => {
           </form>
         </div>
       </div>
-      <ToastContainer position="top-center"/>
+      <ToastContainer position="top-center" limit={1} />
     </div>
   );
 };

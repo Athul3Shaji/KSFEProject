@@ -4,7 +4,7 @@ import Select from "react-select";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { MdPictureAsPdf } from "react-icons/md";
-import { fetchChitty, fetchUsers } from "../services/services";
+import { fetchChitty, fetchUsers, fetchUsersByFilter } from "../services/services";
 
 const ChittyEnroll = () => {
   const [chittiesList, setChittiesList] = useState([]);
@@ -12,60 +12,65 @@ const ChittyEnroll = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [users, setUsers] = useState([]);
+  const [sortConfig, setSortConfig] = useState({ key: 'id', direction: 'asc' });
 
   useEffect(() => {
-    const loadChittiesAndUsers = async () => {
+    const loadChitties = async () => {
       try {
-        const chittiesResponse = await fetchChitty();        
-        // const usersResponse = await fetchUsers();
-
-        const usersResponse = [
-          {
-            id: "E009",
-            name: "Daniel Martinez",
-            mobile: "7788990011",
-            email: "daniel.martinez@example.com",
-            chitty:
-            [2,3,5]
-          },
-          {
-            id: "E010",
-            name: "Manu N Y",
-            mobile: "7788990011",
-            email: "daniel.martinez@example.com",
-            chitty:
-            [1,7,11,2]
-          },
-        ];
-        
+        const chittiesResponse = await fetchChitty();
         setChittiesList([
           { label: "All", value: "ALL" },
           ...chittiesResponse.map((chitty) => ({
-            
             label: chitty.chitty_name,
             value: chitty.id,
           })),
         ]);
-        setUsers(usersResponse);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching chitties:", error);
       }
     };
 
-    loadChittiesAndUsers();
+    loadChitties();
   }, []);
+
+  useEffect(() => {
+    const loadUsers = async () => {
+      try {
+        const chittyId = selectedChitty && selectedChitty.value !== "ALL" ? selectedChitty.value : null;
+        const usersResponse = chittyId 
+          ? await fetchUsersByFilter({ chittyIds: chittyId })
+          : await fetchUsers();
+        
+        setUsers(usersResponse);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
+    };
+
+    loadUsers();
+  }, [selectedChitty]);
 
   const usersPerPage = 7;
 
   const filteredUsers = users
-  .filter((user) =>
-    user.name.toLowerCase().includes(searchTerm.toLowerCase())
-  )
-  .filter((user) =>
-    selectedChitty && selectedChitty.value !== "ALL"
-      ? user.chitty.includes(selectedChitty?.value)
-      : true
-  );
+    .filter((user) =>
+      user.name.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .filter((user) =>
+      selectedChitty && selectedChitty.value !== "ALL"
+        ? user.chitties.includes(Number(selectedChitty.value))
+        : true
+    );
+
+  const sortedUsers = [...filteredUsers].sort((a, b) => {
+    if (a[sortConfig.key] < b[sortConfig.key]) {
+      return sortConfig.direction === 'asc' ? -1 : 1;
+    }
+    if (a[sortConfig.key] > b[sortConfig.key]) {
+      return sortConfig.direction === 'asc' ? 1 : -1;
+    }
+    return 0;
+  });
 
   const handleChittyChange = (selectedOption) => {
     setSelectedChitty(selectedOption);
@@ -80,14 +85,14 @@ const ChittyEnroll = () => {
     doc.text("Chitty Enrollment List", 20, 10);
     doc.autoTable({
       head: [["User ID", "Name", "Mobile", "Email"]],
-      body: filteredUsers.map((user) => [
+      body: sortedUsers.map((user) => [
         user.id,
         user.name,
-        user.mobile,
+        user.mobile_number,
         user.email,
       ]),
     });
-    doc.save("chitty enrollment.pdf");
+    doc.save("chitty_enrollment.pdf");
   };
 
   const handlePageChange = (newPage) => {
@@ -96,9 +101,9 @@ const ChittyEnroll = () => {
 
   const indexOfLastUser = currentPage * usersPerPage;
   const indexOfFirstUser = indexOfLastUser - usersPerPage;
-  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+  const currentUsers = sortedUsers.slice(indexOfFirstUser, indexOfLastUser);
 
-  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+  const totalPages = Math.ceil(sortedUsers.length / usersPerPage);
 
   const handlePrevPage = () => {
     if (currentPage > 1) {
@@ -112,11 +117,19 @@ const ChittyEnroll = () => {
     }
   };
 
+  const requestSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
   return (
     <>
       <Navbar />
-      <div className="min-h-[calc(100vh-90px)] bg-white flex flex-col items-center pt-10 px-4">
-        <div className="w-3/5">
+      <div className="min-h-[calc(100vh-90px)] bg-white flex flex-col items-center pt-10 pb-3 px-4">
+        <div className="w-full md:w-3/4">
           <h1 className="text-4xl font-bold text-gray-800 mb-6 text-center">
             Chitty Enrollment
           </h1>
@@ -148,8 +161,8 @@ const ChittyEnroll = () => {
           </div>
         </div>
 
-        <div className="relative overflow-x-auto shadow-md sm:rounded-lg w-3/5 my-8">
-          {filteredUsers.length === 0 ? (
+        <div className="relative overflow-x-auto w-full md:w-3/4 shadow-md sm:rounded-lg my-8">
+          {sortedUsers.length === 0 ? (
             <div className="text-center py-4 text-gray-500">
               No records found
             </div>
@@ -158,17 +171,40 @@ const ChittyEnroll = () => {
               <table className="w-full text-md text-left text-gray-700">
                 <thead className="text-xs text-gray-100 uppercase bg-gradient-to-r from-[#7fb715] to-[#066769]">
                   <tr>
-                    <th scope="col" className="px-2 py-3">
-                      User ID
+                    <th
+                      scope="col"
+                      className="px-2 py-3 text-center cursor-pointer"
+                      onClick={() => requestSort('id')}
+                    >
+                      ID {sortConfig.key === 'id' && (sortConfig.direction === 'asc' ? '▲' : '▼')}
                     </th>
-                    <th scope="col" className="px-6 py-3">
-                      Name
+                    <th
+                      scope="col"
+                      className="px-4 py-3 cursor-pointer"
+                      onClick={() => requestSort('name')}
+                    >
+                      Name {sortConfig.key === 'name' && (sortConfig.direction === 'asc' ? '▲' : '▼')}
                     </th>
-                    <th scope="col" className="px-7 py-3">
+                    <th scope="col" className="px-4 py-3">
+                      Address
+                    </th>
+                    <th scope="col" className="px-4 py-3">
+                      District
+                    </th>
+                    <th scope="col" className="px-4 py-3">
+                      State
+                    </th>
+                    <th scope="col" className="px-4 py-3">
                       Mobile
                     </th>
-                    <th scope="col" className="px-11 py-3">
+                    <th scope="col" className="px-4 py-3">
                       Email
+                    </th>
+                    <th scope="col" className="px-4 py-3">
+                      Reference
+                    </th>
+                    <th scope="col" className="px-4 py-3 text-center">
+                      Reference Detail
                     </th>
                   </tr>
                 </thead>
@@ -182,10 +218,15 @@ const ChittyEnroll = () => {
                           : "bg-gray-200 border-b"
                       }
                     >
-                      <td className="px-2 py-3 text-gray-900">{user.id}</td>
-                      <td className="px-6 py-3">{user.name}</td>
-                      <td className="px-7 py-3">{user.mobile}</td>
-                      <td className="px-11 py-3">{user.email}</td>
+                      <td className="px-2 py-3 text-gray-900 text-center">{user.id}</td>
+                      <td className="px-4 py-3">{user.name}</td>
+                      <td className="px-4 py-3">{user.address}</td>
+                      <td className="px-4 py-3">{user.district}</td>
+                      <td className="px-4 py-3">{user.state}</td>
+                      <td className="px-4 py-3">{user.mobile_number}</td>
+                      <td className="px-4 py-3">{user.email}</td>
+                      <td className="px-4 py-3">{user.reference}</td>
+                      <td className="px-4 py-3">{user.reference_detail}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -194,8 +235,8 @@ const ChittyEnroll = () => {
           )}
         </div>
 
-        {filteredUsers.length > usersPerPage && (
-          <div className="w-3/5 px-4">
+        {sortedUsers.length > usersPerPage && (
+          <div className="w-full md:w-3/4 px-4">
             <div className="flex justify-between items-center">
               <button
                 onClick={handlePrevPage}

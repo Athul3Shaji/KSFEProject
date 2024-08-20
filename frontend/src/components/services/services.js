@@ -187,3 +187,14 @@ export async function AddUserData(userData) {
     throw error;
   }
 }
+
+// Function to fetch all usersdata
+export async function fetchUsersByFilter(ids) {
+  try {
+    const response = await axios.get(`${API_URL}/admin/search-user,${ids}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    throw error;
+  }
+}
