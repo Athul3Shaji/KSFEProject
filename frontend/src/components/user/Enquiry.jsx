@@ -42,6 +42,70 @@ const Enquiry = () => {
     }
   };
 
+  const userDetailsList = [
+  {
+    address: "Hil",
+    chitties: [6, 7, 10],
+    district: "Ernakulam",
+    email: "vh@gmail.com",
+    mobile: "1234555555",
+    name: "Yadhu",
+    pin: "465675",
+    reference: "agent",
+    referenceDetail: "David Green",
+    state: "Kerala",
+  },
+  {
+    address: "Maple Street",
+    chitties: [2, 3, 5],
+    district: "Kottayam",
+    email: "maple@gmail.com",
+    mobile: "9876543210",
+    name: "John Doe",
+    pin: "682020",
+    reference: "staff",
+    referenceDetail: "Jane Smith",
+    state: "Kerala",
+  },
+  {
+    address: "Pine Avenue",
+    chitties: [1, 4, 8],
+    district: "Thrissur",
+    email: "pine@gmail.com",
+    mobile: "8765432109",
+    name: "Alice Johnson",
+    pin: "680003",
+    reference: "socialmedia",
+    referenceDetail: "Facebook Ad",
+    state: "Kerala",
+  },
+  {
+    address: "Oak Road",
+    chitties: [9, 11, 12],
+    district: "Kozhikode",
+    email: "oak@gmail.com",
+    mobile: "7654321098",
+    name: "Bob Brown",
+    pin: "673001",
+    reference: "direct",
+    referenceDetail: "Walk-in",
+    state: "Kerala",
+  },
+  {
+    address: "Cedar Lane",
+    chitties: [13, 14, 15],
+    district: "Alappuzha",
+    email: "cedar@gmail.com",
+    mobile: "6543210987",
+    name: "Carol White",
+    pin: "688006",
+    reference: "agent",
+    referenceDetail: "Michael Scott",
+    state: "Kerala",
+  },
+  // Add more user objects as needed
+];
+
   useEffect(() => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
@@ -277,6 +341,7 @@ const Enquiry = () => {
                   Mobile<sup className="text-red-500">*</sup>
                 </label>
                 <input
+                maxLength={10}
                   className={`w-full bg-gray-100 text-gray-900 p-3 rounded-lg focus:outline-none focus:shadow-outline ${
                     errors.mobile ? "border-red-500" : ""
                   }`}
@@ -463,10 +528,11 @@ const Enquiry = () => {
                       : []
                   }
                   placeholder="Select Detail"
-                  className={`basic-single bg-gray-100 ${
+                  className={`basic-single ${
                     errors.referenceDetail ? "border-red-500" : ""
                   }`}
                   classNamePrefix="select"
+                  isClearable
                   styles={{
                     control: (provided, state) => ({
                       ...provided,
@@ -529,6 +595,41 @@ const Enquiry = () => {
                     errors.chitties ? "border-red-500" : ""
                   }`}
                   classNamePrefix="select"
+                  styles={{
+                    control: (provided, state) => ({
+                      ...provided,
+                      backgroundColor: "#f7fafc", // Tailwind `bg-gray-100`
+                      color: "#1a202c", // Tailwind `text-gray-900`
+                      padding: "0.3rem", // Tailwind `p-3`
+                      borderRadius: "0.75rem", // Tailwind `rounded-lg`
+                      borderColor: errors.referenceDetail
+                        ? "#f56565" // Tailwind `border-red-500`
+                        : state.isFocused
+                        ? "#63b3ed" // Tailwind `focus:border-blue-400`
+                        : "#e2e8f0", // Tailwind `border-gray-300`
+                      boxShadow: state.isFocused ? "0 0 0 3px rgba(66, 153, 225, 0.5)" : null, // Tailwind `focus:shadow-outline`
+                      "&:hover": {
+                        borderColor: errors.referenceDetail
+                          ? "#f56565" // Tailwind `hover:border-red-500`
+                          : "#a0aec0", // Tailwind `hover:border-gray-400`
+                      },
+                    }),
+                    menu: (provided) => ({
+                      ...provided,
+                      borderRadius: "0.75rem", // Tailwind `rounded-lg`
+                      boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)", // Tailwind `shadow-sm`
+                      backgroundColor: "#ffffff", // Tailwind `bg-white`
+                    }),
+                    option: (provided, state) => ({
+                      ...provided,
+                      backgroundColor: state.isSelected
+                        ? "#3182ce" // Tailwind `bg-blue-500`
+                        : state.isFocused
+                        ? "#ebf8ff" // Tailwind `bg-blue-100`
+                        : "#ffffff", // Tailwind `bg-white`
+                      color: state.isSelected ? "#ffffff" : "#1a202c", // Tailwind `text-white` or `text-gray-900`
+                    }),
+                  }}
                 />
                 {errors.chitties && (
                   <p className="text-red-500 text-sm mt-1">{errors.chitties}</p>

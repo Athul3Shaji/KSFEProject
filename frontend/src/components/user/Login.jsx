@@ -54,7 +54,7 @@ const Login = () => {
             localStorage.setItem('userType', data.user_type);
             navigate('/enquiry');
           } else {
-            const toastId = toast.error(data?.message || 'An unexpected error occurred.', { toastId: 56 });
+            const toastId = toast.error(data?.message || 'An unexpected error occurred.', { toastId: 156 });
             setCurrentToastId(toastId);
           }
         })
@@ -62,7 +62,7 @@ const Login = () => {
           if (currentToastId) {
             toast.dismiss(currentToastId);
           }
-          const toastId = toast.error(err?.response?.data?.message || 'Error logging in. Please try again.', { toastId: 7 });
+          const toastId = toast.error(err?.response?.data?.message || 'Error logging in. Please try again.', { toastId: 157 });
           setCurrentToastId(toastId);
         })
         .finally(() => {

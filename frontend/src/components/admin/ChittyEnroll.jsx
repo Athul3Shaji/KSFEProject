@@ -16,7 +16,7 @@ const ChittyEnroll = () => {
   useEffect(() => {
     const loadChittiesAndUsers = async () => {
       try {
-        const chittiesResponse = await fetchChitty();
+        const chittiesResponse = await fetchChitty();        
         // const usersResponse = await fetchUsers();
 
         const usersResponse = [
@@ -26,7 +26,15 @@ const ChittyEnroll = () => {
             mobile: "7788990011",
             email: "daniel.martinez@example.com",
             chitty:
-              "KSFE Galaxy Chit Series-3 (KGC-S3) (From November 2024 to February 2025)",
+            [2,3,5]
+          },
+          {
+            id: "E010",
+            name: "Manu N Y",
+            mobile: "7788990011",
+            email: "daniel.martinez@example.com",
+            chitty:
+            [1,7,11,2]
           },
         ];
         
@@ -50,14 +58,14 @@ const ChittyEnroll = () => {
   const usersPerPage = 7;
 
   const filteredUsers = users
-    .filter((user) =>
-      user.name.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-    .filter((user) =>
-      selectedChitty && selectedChitty.value !== "ALL"
-        ? user.chitty === selectedChitty.label
-        : true
-    );
+  .filter((user) =>
+    user.name.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+  .filter((user) =>
+    selectedChitty && selectedChitty.value !== "ALL"
+      ? user.chitty.includes(selectedChitty?.value)
+      : true
+  );
 
   const handleChittyChange = (selectedOption) => {
     setSelectedChitty(selectedOption);

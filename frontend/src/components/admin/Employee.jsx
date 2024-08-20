@@ -75,7 +75,7 @@ const Employee = () => {
         const employeesData = await fetchEmployees();
         setEmployees(employeesData);
       } catch (error) {
-        toast.error("Error fetching employees.");
+        toast.error("Error fetching employees.",{toastId:"920"});
       }
     };
     fetchData();
@@ -177,15 +177,15 @@ const Employee = () => {
             : employee
         );
         setEmployees(updatedEmployees);
-        toast.success("Employee updated successfully.");
+        toast.success("Employee updated successfully.",{toastId:"921"});
       } else {
         const response = await addEmployee(employeeData);
         const newEmployeeWithId = { ...employeeData, id: response.id };
         setEmployees((prev) => [...prev, newEmployeeWithId]);
-        toast.success("Employee added successfully.");
+        toast.success("Employee added successfully.",{toastId:"922"});
       }
     } catch (error) {
-      toast.error("Error occurred while saving employee.");
+      toast.error("Error occurred while saving employee.",{toastId:"923"});
     }
 
     handleCloseModal();
@@ -212,9 +212,9 @@ const Employee = () => {
       setEmployees((prev) =>
         prev.filter((employee) => employee.id !== employeeId)
       );
-      toast.success("Employee deleted successfully.");
+      toast.success("Employee deleted successfully.",{toastId:"924"});
     } catch (error) {
-      toast.error("Error deleting employee.");
+      toast.error("Error deleting employee.",{toastId:"925"});
     }
   };
 

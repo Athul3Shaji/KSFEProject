@@ -39,7 +39,7 @@ const Agent = () => {
         const agentsData = await fetchAgents();
         setAgents(agentsData);
       } catch (error) {
-        toast.error("Error fetching agents.");
+        toast.error("Error fetching agents.",{toastId:"930"});
       }
     };
     fetchData();
@@ -112,17 +112,17 @@ const Agent = () => {
           agent.id === newAgent.id ? { ...agent, ...agentData } : agent
         );
         setAgents(updatedAgents);
-        toast.success("Agent updated successfully.");
+        toast.success("Agent updated successfully.",{toastId:"931"});
         setIsEditMode(false);
       } else {
         const response = await addAgent(agentData);
         const newAgentWithId = { ...agentData, id: response.id };
         setAgents((prev) => [...prev, newAgentWithId]);
-        toast.success("Agent added successfully.");
+        toast.success("Agent added successfully.",{toastId:"932"});
       }
     } catch (error) {
       console.error(error);
-      toast.error("Error occurred while saving agent.");
+      toast.error("Error occurred while saving agent.",{toastId:"933"});
     }
 
     handleCloseModal();
@@ -144,9 +144,9 @@ const Agent = () => {
     try {
       await deleteAgent(agentId);
       setAgents((prev) => prev.filter((agent) => agent.id !== agentId));
-      toast.success("Agent deleted successfully.");
+      toast.success("Agent deleted successfully.",{toastId:"934"});
     } catch (error) {
-      toast.error("Error deleting agent.");
+      toast.error("Error deleting agent.",{toastId:"935"});
     }
   };
 
@@ -429,7 +429,7 @@ const Agent = () => {
         </div>
       )}
 
-      <ToastContainer position="top-center" />
+      <ToastContainer position="top-center" limit={1} />
     </>
   );
 };
