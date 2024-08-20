@@ -88,7 +88,11 @@ const User = sequelize.define('User', {
             }
         }
     },
-    reference_from: {
+    reference: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    reference_detail: {
         type: DataTypes.STRING,
         allowNull: true,
     },

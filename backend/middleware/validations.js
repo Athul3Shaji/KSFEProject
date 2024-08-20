@@ -43,7 +43,7 @@ const validateChitty = [
     body('state')
         .notEmpty().withMessage('ERR_STATE_EMPTY|State cannot be empty')
         .isString().withMessage('ERR_STATE_NOT_STRING|State must be a string'),
-    body('reference_from')
+    body('reference')
         .optional() // Allow null or undefined
         .isString().withMessage('ERR_REFERENCE_NOT_STRING|Reference must be a string'),
     body('chitties')
