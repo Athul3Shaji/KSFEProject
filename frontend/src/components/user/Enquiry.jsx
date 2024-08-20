@@ -6,19 +6,19 @@ import "react-toastify/dist/ReactToastify.css";
 import { FaUserCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { states, districts } from "./../data";
-import { fetchAgents, fetchChitty, fetchEmployees,AddUserData } from "../services/services";
+import { fetchAgents, fetchChitty, fetchEmployees,AddUserData,fetchUsers } from "../services/services";
 
 const Enquiry = () => {
   const [formData, setFormData] = useState({
     name: "",
-    mobile: "",
+    mobile_number: "",
     address: "",
     email: "",
     district: "",
     state: "",
     pin: "",
     reference: "",
-    referenceDetail: null, // Update to handle object
+    reference_detail: null, // Update to handle object
     chitties: [],
   });
 
@@ -42,69 +42,6 @@ const Enquiry = () => {
     }
   };
 
-  const userDetailsList = [
-  {
-    address: "Hil",
-    chitties: [6, 7, 10],
-    district: "Ernakulam",
-    email: "vh@gmail.com",
-    mobile: "1234555555",
-    name: "Yadhu",
-    pin: "465675",
-    reference: "agent",
-    referenceDetail: "David Green",
-    state: "Kerala",
-  },
-  {
-    address: "Maple Street",
-    chitties: [2, 3, 5],
-    district: "Kottayam",
-    email: "maple@gmail.com",
-    mobile: "9876543210",
-    name: "John Doe",
-    pin: "682020",
-    reference: "staff",
-    referenceDetail: "Jane Smith",
-    state: "Kerala",
-  },
-  {
-    address: "Pine Avenue",
-    chitties: [1, 4, 8],
-    district: "Thrissur",
-    email: "pine@gmail.com",
-    mobile: "8765432109",
-    name: "Alice Johnson",
-    pin: "680003",
-    reference: "socialmedia",
-    referenceDetail: "Facebook Ad",
-    state: "Kerala",
-  },
-  {
-    address: "Oak Road",
-    chitties: [9, 11, 12],
-    district: "Kozhikode",
-    email: "oak@gmail.com",
-    mobile: "7654321098",
-    name: "Bob Brown",
-    pin: "673001",
-    reference: "direct",
-    referenceDetail: "Walk-in",
-    state: "Kerala",
-  },
-  {
-    address: "Cedar Lane",
-    chitties: [13, 14, 15],
-    district: "Alappuzha",
-    email: "cedar@gmail.com",
-    mobile: "6543210987",
-    name: "Carol White",
-    pin: "688006",
-    reference: "agent",
-    referenceDetail: "Michael Scott",
-    state: "Kerala",
-  },
-  // Add more user objects as needed
-];
 
   useEffect(() => {
     document.addEventListener("mousedown", handleClickOutside);
@@ -167,8 +104,10 @@ const Enquiry = () => {
 
   const validate = () => {
     let formErrors = {};
+  
+    // Check required fields
     if (!formData.name) formErrors.name = "*Name is required";
-    if (!formData.mobile) formErrors.mobile = "*Mobile is required";
+    if (!formData.mobile_number) formErrors.mobile_number = "*Mobile is required";
     if (!formData.address) formErrors.address = "*Address is required";
     if (!formData.district) formErrors.district = "*District is required";
     if (!formData.state) formErrors.state = "*State is required";
@@ -177,11 +116,30 @@ const Enquiry = () => {
     if (
       (formData.reference === "agent" || formData.reference === "staff" ||
       formData.reference === "socialmedia" || formData.reference === "direct") &&
-      !formData.referenceDetail
+      !formData.reference_detail
     )
-      formErrors.referenceDetail = "*Reference detail is required";
+      formErrors.reference_detail = "*Reference detail is required";
     if (formData.chitties.length === 0)
       formErrors.chitties = "*At least one chitty must be selected";
+  
+    // Validate mobile number
+    if (formData.mobile_number) {
+      if (!/^\d+$/.test(formData.mobile_number)) {
+        formErrors.mobile_number = "*Mobile number must be a number";
+      } else if (formData.mobile_number.length < 10) {
+        formErrors.mobile_number = "*Mobile number must be at least 10 digits";
+      }
+    }
+  
+    // Validate PIN
+    if (formData.pin) {
+      if (!/^\d+$/.test(formData.pin)) {
+        formErrors.pin = "*PIN must be a number";
+      } else if (formData.pin.length < 6) {
+        formErrors.pin = "*PIN must be at least 6 digits";
+      }
+    }
+  
     return formErrors;
   };
 
@@ -209,7 +167,7 @@ const Enquiry = () => {
   
   const handleReferenceChange = (e) => {
     const { value } = e.target;
-    setFormData({ ...formData, reference: value, referenceDetail: null });
+    setFormData({ ...formData, reference: value, reference_detail: null });
   
     // Clear reference-related errors
     if (errors.reference) {
@@ -218,10 +176,10 @@ const Enquiry = () => {
         reference: "",
       }));
     }
-    if (errors.referenceDetail) {
+    if (errors.reference_detail) {
       setErrors((prevErrors) => ({
         ...prevErrors,
-        referenceDetail: "",
+        reference_detail: "",
       }));
     }
   };
@@ -238,40 +196,52 @@ const Enquiry = () => {
   const handleReferenceDetailChange = (option) => {
     setFormData((prevState) => ({
       ...prevState,
-      referenceDetail: option || null, // Set the selected option object
+      reference_detail: option || null, // Set the selected option object
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const formErrors = validate();
+    
     if (Object.keys(formErrors).length === 0) {
-      const submissionData = {
-        ...formData,
-        referenceDetail: formData.referenceDetail?.label 
+      try {
+        const submissionData = {
+          ...formData,
+          reference_detail: formData.reference_detail?.label,
+        };
+        console.log(submissionData);
+        
+        await AddUserData(submissionData);
+        showToast("Details added successfully!");
+        
+        setIsSubmitted(true);
+        setFormData({
+          name: "",
+          mobile_number: "",
+          address: "",
+          email: "",
+          district: "",
+          state: "",
+          pin: "",
+          reference: "",
+          reference_detail: null,
+          chitties: [],
+        });
+        setErrors({}); 
+      } catch (error) {
+        // Handle errors from AddUserData
+        if (error.response && error.response.status === 400) {
+          showToast("Bad Request: Please check your input and try again.");
+        } else {
+          showToast("An unexpected error occurred. Please try again.");
+        }
       }
-      AddUserData(submissionData);
-      console.log(submissionData, "----------------");
-      showToast("Details added successfully!");
-      
-      setIsSubmitted(true);
-      setFormData({
-        name: "",
-        mobile: "",
-        address: "",
-        email: "",
-        district: "",
-        state: "",
-        pin: "",
-        reference: "",
-        referenceDetail: null,
-        chitties: [],
-      });
-      setErrors({}); // Clear errors
     } else {
       setErrors(formErrors);
     }
   };
+  
   
 
   const handleSignOut = () => {
@@ -341,18 +311,18 @@ const Enquiry = () => {
                   Mobile<sup className="text-red-500">*</sup>
                 </label>
                 <input
-                maxLength={10}
+                maxLength={12}
                   className={`w-full bg-gray-100 text-gray-900 p-3 rounded-lg focus:outline-none focus:shadow-outline ${
-                    errors.mobile ? "border-red-500" : ""
+                    errors.mobile_number ? "border-red-500" : ""
                   }`}
                   type="text"
-                  name="mobile"
-                  value={formData.mobile}
+                  name="mobile_number"
+                  value={formData.mobile_number}
                   onChange={handleChange}
                   placeholder="Mobile*"
                 />
-                {errors.mobile && (
-                  <p className="text-red-500 text-sm mt-1">{errors.mobile}</p>
+                {errors.mobile_number && (
+                  <p className="text-red-500 text-sm mt-1">{errors.mobile_number}</p>
                 )}
               </div>
 
@@ -457,6 +427,7 @@ const Enquiry = () => {
                   PIN<sup className="text-red-500">*</sup>
                 </label>
                 <input
+                maxLength={6}
                   className={`w-full bg-gray-100 text-gray-900 p-3 rounded-lg focus:outline-none focus:shadow-outline ${
                     errors.pin ? "border-red-500" : ""
                   }`}
@@ -501,12 +472,12 @@ const Enquiry = () => {
                 <div>
                 <label
                   className="block text-gray-700 font-bold mb-2"
-                  htmlFor="referenceDetail"
+                  htmlFor="reference_detail"
                 >
                   Reference Detail<sup className="text-red-500">*</sup>
                 </label>
                 <Select
-                  value={formData.referenceDetail}
+                  value={formData.reference_detail}
                   onChange={handleReferenceDetailChange}
                   options={
                     formData.reference === "agent"
@@ -529,7 +500,7 @@ const Enquiry = () => {
                   }
                   placeholder="Select Detail"
                   className={`basic-single ${
-                    errors.referenceDetail ? "border-red-500" : ""
+                    errors.reference_detail ? "border-red-500" : ""
                   }`}
                   classNamePrefix="select"
                   isClearable
@@ -540,14 +511,14 @@ const Enquiry = () => {
                       color: "#1a202c", // Tailwind `text-gray-900`
                       padding: "0.3rem", // Tailwind `p-3`
                       borderRadius: "0.75rem", // Tailwind `rounded-lg`
-                      borderColor: errors.referenceDetail
+                      borderColor: errors.reference_detail
                         ? "#f56565" // Tailwind `border-red-500`
                         : state.isFocused
                         ? "#63b3ed" // Tailwind `focus:border-blue-400`
                         : "#e2e8f0", // Tailwind `border-gray-300`
                       boxShadow: state.isFocused ? "0 0 0 3px rgba(66, 153, 225, 0.5)" : null, // Tailwind `focus:shadow-outline`
                       "&:hover": {
-                        borderColor: errors.referenceDetail
+                        borderColor: errors.reference_detail
                           ? "#f56565" // Tailwind `hover:border-red-500`
                           : "#a0aec0", // Tailwind `hover:border-gray-400`
                       },
@@ -569,8 +540,8 @@ const Enquiry = () => {
                     }),
                   }}
                 />
-                {errors.referenceDetail && (
-                  <p className="text-red-500 text-sm mt-1">{errors.referenceDetail}</p>
+                {errors.reference_detail && (
+                  <p className="text-red-500 text-sm mt-1">{errors.reference_detail}</p>
                 )}
               </div>
               
@@ -602,14 +573,14 @@ const Enquiry = () => {
                       color: "#1a202c", // Tailwind `text-gray-900`
                       padding: "0.3rem", // Tailwind `p-3`
                       borderRadius: "0.75rem", // Tailwind `rounded-lg`
-                      borderColor: errors.referenceDetail
+                      borderColor: errors.reference_detail
                         ? "#f56565" // Tailwind `border-red-500`
                         : state.isFocused
                         ? "#63b3ed" // Tailwind `focus:border-blue-400`
                         : "#e2e8f0", // Tailwind `border-gray-300`
                       boxShadow: state.isFocused ? "0 0 0 3px rgba(66, 153, 225, 0.5)" : null, // Tailwind `focus:shadow-outline`
                       "&:hover": {
-                        borderColor: errors.referenceDetail
+                        borderColor: errors.reference_detail
                           ? "#f56565" // Tailwind `hover:border-red-500`
                           : "#a0aec0", // Tailwind `hover:border-gray-400`
                       },
