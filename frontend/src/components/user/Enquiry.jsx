@@ -18,7 +18,7 @@ const Enquiry = () => {
     state: "",
     pin: "",
     reference: "",
-    reference_detail: null, // Update to handle object
+    reference_detail: null, 
     chitties: [],
   });
 
@@ -105,7 +105,6 @@ const Enquiry = () => {
   const validate = () => {
     let formErrors = {};
   
-    // Check required fields
     if (!formData.name) formErrors.name = "*Name is required";
     if (!formData.mobile_number) formErrors.mobile_number = "*Mobile is required";
     if (!formData.address) formErrors.address = "*Address is required";
@@ -147,7 +146,6 @@ const Enquiry = () => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   
-    // Clear error for the specific field being corrected
     if (errors[name]) {
       setErrors((prevErrors) => ({
         ...prevErrors,
@@ -210,7 +208,6 @@ const Enquiry = () => {
           ...formData,
           reference_detail: formData.reference_detail?.label,
         };
-        console.log(submissionData);
         
         await AddUserData(submissionData);
         showToast("Details added successfully!");

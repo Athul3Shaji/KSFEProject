@@ -99,7 +99,6 @@ const Chitty = () => {
     try {
       if (isEditMode) {
         await updateChitty(newChitty.id,newChitty);
-        console.log(newChitty.id,newChitty,"iiiiiiiiiiiiiiiiiiiiiiii");
         
         const updatedChitties = chitties.map((chitty) =>
           chitty.id === editId ? newChitty : chitty
@@ -211,11 +210,11 @@ const Chitty = () => {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-white flex flex-col items-center pt-10">
+      <div className="min-h-[calc(100vh-90px)] bg-white flex flex-col items-center pt-10">
         <h1 className="text-4xl font-bold text-gray-800 mb-6 text-center">
           Chitties
         </h1>
-        <div className="w-3/5 flex justify-between items-center mb-4">
+        <div className="w-3/4 flex justify-between items-center mb-4">
           <div className="flex w-full justify-between">
             <div className="relative w-80">
               <label htmlFor="chitty-search" className="sr-only">
@@ -244,7 +243,7 @@ const Chitty = () => {
           </div>
         </div>
 
-        <div className="relative overflow-x-auto shadow-md sm:rounded-lg w-3/5">
+        <div className="relative overflow-x-auto shadow-md sm:rounded-lg w-3/4">
           {filteredChitties.length > 0 ? (
             <table className="w-full text-sm text-left text-gray-700">
               <thead className="text-xs text-gray-100 uppercase bg-gradient-to-r from-[#7fb715] to-[#066769]">

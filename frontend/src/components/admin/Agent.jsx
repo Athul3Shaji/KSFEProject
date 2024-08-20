@@ -32,6 +32,7 @@ const Agent = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const modalRef = useRef(null);
+  const [sortConfig, setSortConfig] = useState({ key: 'id', direction: 'asc' });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -121,7 +122,6 @@ const Agent = () => {
         toast.success("Agent added successfully.",{toastId:"932"});
       }
     } catch (error) {
-      console.error(error);
       toast.error("Error occurred while saving agent.",{toastId:"933"});
     }
 
@@ -150,6 +150,13 @@ const Agent = () => {
     }
   };
 
+  const requestSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };   
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setFormErrors("");
@@ -164,6 +171,15 @@ const Agent = () => {
       agent.agent_mobile.toString().includes(searchTerm)
   );
 
+  const sortedAgents = [...filteredAgents].sort((a, b) => {
+    if (a[sortConfig.key] < b[sortConfig.key]) {
+      return sortConfig.direction === 'asc' ? -1 : 1;
+    }
+    if (a[sortConfig.key] > b[sortConfig.key]) {
+      return sortConfig.direction === 'asc' ? 1 : -1;
+    }
+    return 0;
+  });
   const totalPages = Math.ceil(filteredAgents.length / AgentsPerPage);
   const startIndex = (currentPage - 1) * AgentsPerPage;
   const currentAgents = filteredAgents.slice(
@@ -186,7 +202,7 @@ const Agent = () => {
         <h1 className="text-4xl font-bold text-gray-800 mb-6 text-center">
           Agents
         </h1>
-        <div className="w-3/5 flex justify-between items-center mb-4">
+        <div className="w-3/4 flex justify-between items-center mb-4">
           <div className="flex w-full justify-between">
             <div className="relative w-80">
               <label htmlFor="chitty-search" className="sr-only">
@@ -216,7 +232,7 @@ const Agent = () => {
           </div>
         </div>
 
-        <div className="relative overflow-x-auto shadow-md sm:rounded-lg w-3/5">
+        <div className="relative overflow-x-auto shadow-md sm:rounded-lg w-3/4">
         {filteredAgents.length === 0 ? (
     <div className="text-center py-4 text-gray-500">
       No agents found.
@@ -224,60 +240,74 @@ const Agent = () => {
   ) : (
           <table className="w-full text-md text-left text-gray-700">
             <thead className="text-xs text-gray-100 uppercase bg-gradient-to-r from-[#7fb715] to-[#066769]">
-              <tr>
-                <th scope="col" className="px-2 py-3">
-                  Agent ID
-                </th>
-                <th scope="col" className="px-6 py-3">
-                  Name
-                </th>
-                <th scope="col" className="px-7 py-3">
-                  Code
-                </th>
-                <th scope="col" className="px-11 py-3">
-                  Mobile
-                </th>
-                <th scope="col" className="px-3 py-3">
-                  Action
-                </th>
-              </tr>
-            </thead>
+  <tr>
+    <th
+      scope="col"
+      className="px-2 py-3 cursor-pointer"
+      onClick={() => requestSort('id')}
+    >
+      Agent ID {sortConfig.key === 'id' && (sortConfig.direction === 'asc' ? '▲' : '▼')}
+    </th>
+    <th
+      scope="col"
+      className="px-6 py-3 cursor-pointer"
+      onClick={() => requestSort('name')}
+    >
+      Name {sortConfig.key === 'name' && (sortConfig.direction === 'asc' ? '▲' : '▼')}
+    </th>
+    <th
+      scope="col"
+      className="px-7 py-3 cursor-pointer"
+      onClick={() => requestSort('code')}
+    >
+      Code {sortConfig.key === 'code' && (sortConfig.direction === 'asc' ? '▲' : '▼')}
+    </th>
+    <th scope="col" className="px-11 py-3">
+      Mobile
+    </th>
+    <th scope="col" className="px-3 py-3">
+      Action
+    </th>
+  </tr>
+</thead>
+
             <tbody>
-              {currentAgents.map((agent, index) => (
-                <tr
-                  key={agent.id}
-                  className={`${
-                    index % 2 === 0 ? "bg-gray-200" : "bg-blue-50"
-                  } border-b`}
-                >
-                  <th
-                    scope="row"
-                    className="px-2 py-3 font-medium text-gray-900 whitespace-nowrap text-base"
-                  >
-                    {agent.id}
-                  </th>
-                  <td className="px-2 py-3 text-base">{agent.agent_name}</td>
-                  <td className="px-2 py-3 text-base">{agent.agent_code}</td>
-                  <td className="px-2 py-3 text-base">{agent.agent_mobile}</td>
-                  <td className="px-2 py-3 flex space-x-4">
-                    <a
-                      href="#"
-                      className="text-blue-600 hover:text-blue-800"
-                      onClick={() => handleEdit(agent.id)}
-                    >
-                      <MdEdit className="w-5 h-5" />
-                    </a>
-                    <a
-                      href="#"
-                      className="text-red-600 hover:text-red-800"
-                      onClick={() => handleDelete(agent.id)}
-                    >
-                      <FaTrashAlt className="w-5 h-5" />
-                    </a>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
+  {sortedAgents.slice(startIndex, startIndex + AgentsPerPage).map((agent, index) => (
+    <tr
+      key={agent.id}
+      className={`${
+        index % 2 === 0 ? "bg-gray-200" : "bg-blue-50"
+      } border-b`}
+    >
+      <th
+        scope="row"
+        className="px-7 py-3 font-medium text-gray-900 whitespace-nowrap text-base"
+      >
+        {agent.id}
+      </th>
+      <td className="px-2 py-3 text-base">{agent.agent_name}</td>
+      <td className="px-2 py-3 text-base">{agent.agent_code}</td>
+      <td className="px-2 py-3 text-base">{agent.agent_mobile}</td>
+      <td className="px-2 py-3 flex space-x-4">
+        <a
+          href="#"
+          className="text-blue-600 hover:text-blue-800"
+          onClick={() => handleEdit(agent.id)}
+        >
+          <MdEdit className="w-5 h-5" />
+        </a>
+        <a
+          href="#"
+          className="text-red-600 hover:text-red-800"
+          onClick={() => handleDelete(agent.id)}
+        >
+          <FaTrashAlt className="w-5 h-5" />
+        </a>
+      </td>
+    </tr>
+  ))}
+</tbody>
+
           </table>
   )}
           {totalPages > 1 && (

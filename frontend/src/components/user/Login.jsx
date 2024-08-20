@@ -44,7 +44,6 @@ const Login = () => {
 
       userLogin(loginData)
         .then((data) => {
-          console.log('Response Data:', data); // Debugging log
           if (currentToastId) {
             toast.dismiss(currentToastId);
           }

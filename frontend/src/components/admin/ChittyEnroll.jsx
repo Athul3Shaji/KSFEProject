@@ -4,7 +4,12 @@ import Select from "react-select";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { MdPictureAsPdf } from "react-icons/md";
-import { fetchChitty, fetchUsers, fetchUsersByFilter } from "../services/services";
+import {
+  fetchChitty,
+  fetchUsers,
+  fetchUsersByFilter,
+} from "../services/services";
+import { toast, ToastContainer } from "react-toastify";
 
 const ChittyEnroll = () => {
   const [chittiesList, setChittiesList] = useState([]);
@@ -12,7 +17,7 @@ const ChittyEnroll = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [users, setUsers] = useState([]);
-  const [sortConfig, setSortConfig] = useState({ key: 'id', direction: 'asc' });
+  const [sortConfig, setSortConfig] = useState({ key: "id", direction: "asc" });
 
   useEffect(() => {
     const loadChitties = async () => {
@@ -26,7 +31,7 @@ const ChittyEnroll = () => {
           })),
         ]);
       } catch (error) {
-        console.error("Error fetching chitties:", error);
+        toast.error("Error fetching chitties:", { toastId: "121" });
       }
     };
 
@@ -36,14 +41,17 @@ const ChittyEnroll = () => {
   useEffect(() => {
     const loadUsers = async () => {
       try {
-        const chittyId = selectedChitty && selectedChitty.value !== "ALL" ? selectedChitty.value : null;
-        const usersResponse = chittyId 
-          ? await fetchUsersByFilter({ chittyIds: chittyId })
-          : await fetchUsers();
-        
+        const chittyId =
+          selectedChitty && selectedChitty?.value !== "ALL"
+            ? [selectedChitty?.value]
+            : [];
+        const usersResponse =
+          chittyId.length > 0
+            ? await fetchUsersByFilter({ chittyIds: chittyId })
+            : await fetchUsers();
         setUsers(usersResponse);
       } catch (error) {
-        console.error("Error fetching users:", error);
+        toast.error("Error fetching users:", { toastId: "122" });
       }
     };
 
@@ -64,10 +72,10 @@ const ChittyEnroll = () => {
 
   const sortedUsers = [...filteredUsers].sort((a, b) => {
     if (a[sortConfig.key] < b[sortConfig.key]) {
-      return sortConfig.direction === 'asc' ? -1 : 1;
+      return sortConfig.direction === "asc" ? -1 : 1;
     }
     if (a[sortConfig.key] > b[sortConfig.key]) {
-      return sortConfig.direction === 'asc' ? 1 : -1;
+      return sortConfig.direction === "asc" ? 1 : -1;
     }
     return 0;
   });
@@ -118,9 +126,9 @@ const ChittyEnroll = () => {
   };
 
   const requestSort = (key) => {
-    let direction = 'asc';
-    if (sortConfig.key === key && sortConfig.direction === 'asc') {
-      direction = 'desc';
+    let direction = "asc";
+    if (sortConfig.key === key && sortConfig.direction === "asc") {
+      direction = "desc";
     }
     setSortConfig({ key, direction });
   };
@@ -174,16 +182,20 @@ const ChittyEnroll = () => {
                     <th
                       scope="col"
                       className="px-2 py-3 text-center cursor-pointer"
-                      onClick={() => requestSort('id')}
+                      onClick={() => requestSort("id")}
                     >
-                      ID {sortConfig.key === 'id' && (sortConfig.direction === 'asc' ? '▲' : '▼')}
+                      ID{" "}
+                      {sortConfig.key === "id" &&
+                        (sortConfig.direction === "asc" ? "▲" : "▼")}
                     </th>
                     <th
                       scope="col"
                       className="px-4 py-3 cursor-pointer"
-                      onClick={() => requestSort('name')}
+                      onClick={() => requestSort("name")}
                     >
-                      Name {sortConfig.key === 'name' && (sortConfig.direction === 'asc' ? '▲' : '▼')}
+                      Name{" "}
+                      {sortConfig.key === "name" &&
+                        (sortConfig.direction === "asc" ? "▲" : "▼")}
                     </th>
                     <th scope="col" className="px-4 py-3">
                       Address
@@ -218,7 +230,9 @@ const ChittyEnroll = () => {
                           : "bg-gray-200 border-b"
                       }
                     >
-                      <td className="px-2 py-3 text-gray-900 text-center">{user.id}</td>
+                      <td className="px-2 py-3 text-gray-900 text-center">
+                        {user.id}
+                      </td>
                       <td className="px-4 py-3">{user.name}</td>
                       <td className="px-4 py-3">{user.address}</td>
                       <td className="px-4 py-3">{user.district}</td>
@@ -259,6 +273,7 @@ const ChittyEnroll = () => {
           </div>
         )}
       </div>
+      <ToastContainer position="top-center" limit={1} />
     </>
   );
 };

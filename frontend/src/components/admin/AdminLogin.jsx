@@ -44,7 +44,6 @@ const AdminLogin = () => {
 
       adminLogin(loginData)
         .then((data) => {
-          console.log(data);
 
           if (currentToastId) {
             toast.dismiss(currentToastId);
