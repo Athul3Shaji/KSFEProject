@@ -169,10 +169,21 @@ export async function deleteChitty(id) {
 // Function to fetch all usersdata
 export async function fetchUsers() {
   try {
-    const response = await axios.get(`${API_URL}/admin/users`);
+    const response = await axios.get(`${API_URL}/user`);
     return response.data;
   } catch (error) {
-    console.error("Error fetching chitties:", error);
+    console.error("Error fetching users:", error);
+    throw error;
+  }
+}
+
+// Function to fetch all usersdata
+export async function AddUserData(userData) {
+  try {
+    const response = await axios.post(`${API_URL}/user/add`,userData);
+    return response.data;
+  } catch (error) {
+    console.error("Error adding users:", error);
     throw error;
   }
 }

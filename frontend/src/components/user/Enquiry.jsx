@@ -6,7 +6,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { FaUserCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { states, districts } from "./../data";
-import { fetchAgents, fetchChitty, fetchEmployees } from "../services/services";
+import { fetchAgents, fetchChitty, fetchEmployees,AddUserData } from "../services/services";
 
 const Enquiry = () => {
   const [formData, setFormData] = useState({
@@ -250,7 +250,7 @@ const Enquiry = () => {
         ...formData,
         referenceDetail: formData.referenceDetail?.label 
       }
-
+      AddUserData(submissionData);
       console.log(submissionData, "----------------");
       showToast("Details added successfully!");
       
