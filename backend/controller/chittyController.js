@@ -15,16 +15,23 @@ const add_chitty = async(req,res)=>{
         res.status(201).send(chitty.toJSON())
 
     } catch (error) {
-        console.log(error)
-        if(error.name === 'SequelizeValidationError' || error.name === 'SequelizeUniqueConstraintError'){
-            const errors = error.errors.map(err =>err.message);
-            res.status(400).json({errors})
+        console.log(error);
+
+        if (error.name === 'SequelizeValidationError' || error.name === 'SequelizeUniqueConstraintError') {
+            // Extract and format the errors
+            const errors = error.errors.map(err => {
+                const [code, message] = err.message.split('|'); // Split code and message
+                console.log(code,message)
+                return {
+                    code: code || 'VALIDATION_ERROR',
+                    message: message || err.message
+                };
+            });
+
+            res.status(400).json({ errors });
         } else {
             res.status(500).send("Unexpected error occurred");
         }
-    
-
-        
     }
 
 }
@@ -90,14 +97,23 @@ const update_chitty = async (req, res) => {
         await chitty.update(updatedData);
 
         res.status(200).json(chitty);
-    } catch (error) {
+    }  catch (error) {
         console.log(error);
 
         if (error.name === 'SequelizeValidationError' || error.name === 'SequelizeUniqueConstraintError') {
-            const errors = error.errors.map(err => err.message);
+            // Extract and format the errors
+            const errors = error.errors.map(err => {
+                const [code, message] = err.message.split('|'); // Split code and message
+                console.log(code,message)
+                return {
+                    code: code || 'VALIDATION_ERROR',
+                    message: message || err.message
+                };
+            });
+
             res.status(400).json({ errors });
         } else {
-            res.status(500).send("Unexpected error occurred while updating the chitty");
+            res.status(500).send("Unexpected error occurred");
         }
     }
 };
@@ -128,11 +144,6 @@ const delete_chitty = async (req, res) => {
         }
     }
 };
-
-
-chitty_filter = async(req,res)=>{
-    
-}
 
 
 module.exports ={add_chitty,get_chitty,get_chitty_by_id,update_chitty,delete_chitty}
