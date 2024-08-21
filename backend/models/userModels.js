@@ -42,17 +42,7 @@ const User = sequelize.define('User', {
     email: {
         type: DataTypes.STRING,
         allowNull:true,
-        unique: {
-            msg: 'ERR_EMAIL_UNIQUE|Email already exists'
-        },
-        validate: {
-            notEmpty: {
-                msg: 'ERR_EMAIL_EMPTY|Email cannot be empty'
-            },
-            isEmail: {
-                msg: 'ERR_EMAIL_INVALID|Email must be a valid email address'
-            }
-        }
+       
     },
     district: {
         type: DataTypes.STRING,
