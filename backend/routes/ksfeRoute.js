@@ -14,7 +14,7 @@ router.post('/admin/login',admin_login)
 
 // routes of employee
 router.post('/admin/employee/add',admin_verifyToken,validateEmployee,add_employee)
-router.get('/admin/employee',admin_verifyToken,get_employees)
+router.get('/admin/employee',get_employees)
 router.get('/admin/employee/:id',admin_verifyToken,get_employee_by_id)
 router.put('/admin/employee/update/:id', admin_verifyToken,validateEmployee,update_employee);
 router.delete('/admin/employee/delete/:id',admin_verifyToken,delete_employee)
