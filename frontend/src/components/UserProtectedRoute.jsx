@@ -3,7 +3,7 @@ import { Navigate, Outlet } from "react-router-dom";
 
 const UserProtectedRoute = () => {
   const useAuth = () => {
-    const userToken = localStorage.getItem("user_accesstoken");
+    const userToken = localStorage.getItem("accesstoken");
     const userType = localStorage.getItem("userType");
     return Boolean(userToken && userType === "user");
   };

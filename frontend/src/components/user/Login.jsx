@@ -13,7 +13,7 @@ const Login = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (localStorage.getItem('user_accesstoken')) {
+    if (localStorage.getItem('accesstoken')) {
       navigate('/enquiry');
     }
   }, [navigate]);
@@ -49,7 +49,7 @@ const Login = () => {
           }
 
           if (data?.user_accestoken) {
-            localStorage.setItem('user_accesstoken', data.user_accestoken);
+            localStorage.setItem('accesstoken', data.user_accestoken);
             localStorage.setItem('userType', data.user_type);
             navigate('/enquiry');
           } else {
