@@ -90,17 +90,32 @@ const ChittyEnroll = () => {
 
   const handleExportPDF = () => {
     const doc = new jsPDF();
-    doc.text("Chitty Enrollment List", 20, 10);
+    doc.text(`${selectedChitty.label}`, 20, 10);
     doc.autoTable({
-      head: [["User ID", "Name", "Mobile", "Email"]],
+      head: [["ID", "Name", "Mobile", "Email","District","State","Reference","Reference Detail"]],
       body: sortedUsers.map((user) => [
         user.id,
         user.name,
         user.mobile_number,
         user.email,
+        user.district,
+        user.state,
+        user.reference,
+        user.reference_detail
       ]),
     });
-    doc.save("chitty_enrollment.pdf");
+ // Generate current date and time in DDMMYYYY_HHMM format
+ const now = new Date();
+ const day = String(now.getDate()).padStart(2, '0');
+ const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+ const year = now.getFullYear();
+ const hours = String(now.getHours()).padStart(2, '0');
+ const minutes = String(now.getMinutes()).padStart(2, '0');
+ 
+ const timestamp = `${day}${month}${year}`;
+ 
+ // Save the file with timestamp in the filename
+ doc.save(`${selectedChitty.label}- ${timestamp}.pdf`);
   };
 
   const handlePageChange = (newPage) => {
