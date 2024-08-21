@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { userLogin } from '../services/services';
 import logo from '../../assets/ksfe-logo.svg';
@@ -13,8 +13,10 @@ const Login = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (localStorage.getItem('accesstoken')) {
-      navigate('/enquiry');
+    // Check for existing access token and navigate if present
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      navigate("/enquiry");
     }
   }, [navigate]);
 
@@ -35,40 +37,39 @@ const Login = () => {
     }
   };
 
+  const performLogin = useCallback(async () => {
+    try {
+      const loginData = { username, userpassword: password };
+      const data = await userLogin(loginData);
+
+      if (currentToastId) {
+        toast.dismiss(currentToastId);
+      }
+
+      if (data?.user_accestoken) {
+        localStorage.setItem('accessToken', data.user_accestoken);
+        localStorage.setItem('userType', data.user_type);
+        navigate('/enquiry');
+      } else {
+        const toastId = toast.error(data?.message || 'An unexpected error occurred.', { toastId: 156 });
+        setCurrentToastId(toastId);
+      }
+    } catch (err) {
+      if (currentToastId) {
+        toast.dismiss(currentToastId);
+      }
+      const toastId = toast.error(err?.response?.data?.message || 'Error logging in. Please try again.', { toastId: 157 });
+      setCurrentToastId(toastId);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [username, password, navigate, currentToastId]);
+
   useEffect(() => {
     if (isSubmitting) {
-      const loginData = {
-        username,
-        userpassword: password,
-      };
-
-      userLogin(loginData)
-        .then((data) => {
-          if (currentToastId) {
-            toast.dismiss(currentToastId);
-          }
-
-          if (data?.user_accestoken) {
-            localStorage.setItem('accesstoken', data.user_accestoken);
-            localStorage.setItem('userType', data.user_type);
-            navigate('/enquiry');
-          } else {
-            const toastId = toast.error(data?.message || 'An unexpected error occurred.', { toastId: 156 });
-            setCurrentToastId(toastId);
-          }
-        })
-        .catch((err) => {
-          if (currentToastId) {
-            toast.dismiss(currentToastId);
-          }
-          const toastId = toast.error(err?.response?.data?.message || 'Error logging in. Please try again.', { toastId: 157 });
-          setCurrentToastId(toastId);
-        })
-        .finally(() => {
-          setIsSubmitting(false);
-        });
+      performLogin();
     }
-  }, [isSubmitting, username, password, navigate, currentToastId]);
+  }, [isSubmitting, performLogin]);
 
   return (
     <div>

@@ -50,7 +50,7 @@ const AdminLogin = () => {
           }
 
           if (data?.admin_accestoken) {
-            localStorage.setItem("accessToken", data.user_accestoken);
+            localStorage.setItem("accessToken", data.admin_accestoken);
             localStorage.setItem("userType", data.user_type);
             localStorage.setItem("refreshToken", data.refreshToken);
             navigate("/adminhome");
