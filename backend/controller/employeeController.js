@@ -7,8 +7,18 @@ const add_employee = async (req, res) => {
         res.status(201).send(employee.toJSON());
     } catch (error) {
         console.log(error);
+
         if (error.name === 'SequelizeValidationError' || error.name === 'SequelizeUniqueConstraintError') {
-            const errors = error.errors.map(err => err.message);
+            // Extract and format the errors
+            const errors = error.errors.map(err => {
+                const [code, message] = err.message.split('|'); // Split code and message
+                console.log(code,message)
+                return {
+                    code: code || 'VALIDATION_ERROR',
+                    message: message || err.message
+                };
+            });
+
             res.status(400).json({ errors });
         } else {
             res.status(500).send("Unexpected error occurred");
@@ -53,6 +63,7 @@ const get_employee_by_id = async (req, res) => {
 
 const update_employee = async (req, res) => {
     const { id } = req.params;
+    console.log("object",id)
     const updatedData = {...req.body};
 
     try {
@@ -74,10 +85,19 @@ const update_employee = async (req, res) => {
         console.log(error);
 
         if (error.name === 'SequelizeValidationError' || error.name === 'SequelizeUniqueConstraintError') {
-            const errors = error.errors.map(err => err.message);
+            // Extract and format the errors
+            const errors = error.errors.map(err => {
+                const [code, message] = err.message.split('|'); // Split code and message
+                console.log(code,message)
+                return {
+                    code: code || 'VALIDATION_ERROR',
+                    message: message || err.message
+                };
+            });
+
             res.status(400).json({ errors });
         } else {
-            res.status(500).send("Unexpected error occurred while updating the employee");
+            res.status(500).send("Unexpected error occurred");
         }
     }
 };

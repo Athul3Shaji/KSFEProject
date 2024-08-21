@@ -13,22 +13,8 @@ const User = sequelize.define('User', {
     },
     mobile_number: {
         type: DataTypes.STRING,
-        allowNull: false,
-        unique: {
-            msg: 'ERR_MOBILE_UNIQUE|Mobile already exists'
-        },
-        validate: {
-            notEmpty: {
-                msg: 'ERR_MOBILE_EMPTY|Mobile number cannot be empty'
-            },
-            isNumeric: {
-                msg: 'ERR_MOBILE_NOT_NUMERIC|Mobile number must be numeric'
-            },
-            len: {
-                args: [10, 15],
-                msg: 'ERR_MOBILE_LENGTH|Mobile number must be between 10 and 15 characters'
-            }
-        }
+        allowNull: true,
+       
     },
     address: {
         type: DataTypes.STRING,
