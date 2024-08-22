@@ -99,13 +99,13 @@ const Agent = () => {
   const handleAddAgent = async (e) => {
     e.preventDefault();
     if (!validateData()) return;
-
+  
     const agentData = {
       agent_name: newAgent.name,
       agent_code: newAgent.code,
       agent_mobile: Number(newAgent.mobile),
     };
-
+  
     try {
       if (isEditMode) {
         await updateAgent(newAgent.id, agentData);
@@ -113,20 +113,31 @@ const Agent = () => {
           agent.id === newAgent.id ? { ...agent, ...agentData } : agent
         );
         setAgents(updatedAgents);
-        toast.success("Agent updated successfully.",{toastId:"931"});
+        toast.success("Agent updated successfully.", { toastId: "931" });
         setIsEditMode(false);
+        handleCloseModal(); // Move handleCloseModal here so it closes only if there’s no error
       } else {
         const response = await addAgent(agentData);
         const newAgentWithId = { ...agentData, id: response.id };
         setAgents((prev) => [...prev, newAgentWithId]);
-        toast.success("Agent added successfully.",{toastId:"932"});
+        toast.success("Agent added successfully.", { toastId: "932" });
+        handleCloseModal(); // Move handleCloseModal here so it closes only if there’s no error
       }
     } catch (error) {
-      toast.error("Error occurred while saving agent.",{toastId:"933"});
+      // Check for specific error codes
+      if (error.response && error.response.data.errors) {
+        const errorCodes = error.response.data.errors.map((err) => err.code);
+  
+        if (errorCodes.includes("ERR_AGENT_MOBILE_UNIQUE")) {
+          toast.error("Agent mobile must be unique.", { toastId: "933" });
+        } else {
+          toast.error("Error occurred while saving agent.", { toastId: "934" });
+        }
+      } else {
+        toast.error("Unexpected error occurred.", { toastId: "935" });
+      }
     }
-
-    handleCloseModal();
-  };
+  };  
 
   const handleEdit = (agentId) => {
     const agentToEdit = agents.find((agent) => agent.id === agentId);

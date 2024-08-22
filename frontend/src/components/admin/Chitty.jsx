@@ -64,42 +64,48 @@ const Chitty = () => {
       per_month_emi,
       total_amount,
     } = newChitty;
-
+  
     if (!chitty_code.trim()) {
       errors.chitty_code = "Chitty CODE cannot be empty.";
     }
     if (!chitty_name.trim()) {
       errors.chitty_name = "Chitty Name cannot be empty.";
     }
-    if (!chitty_tenure.toString().trim()) {
-      errors.chitty_tenure = "Chitty Tenure cannot be empty.";
+
+    if (!chitty_tenure.toString().trim() || isNaN(chitty_tenure)) {
+      errors.chitty_tenure = "Chitty Tenure must be a valid.";
     }
-    if (!per_month_emi.toString().trim()) {
-      errors.per_month_emi = "Per Month EMI cannot be empty.";
+
+    if (!per_month_emi.toString().trim() || isNaN(per_month_emi)) {
+      errors.per_month_emi = "Per Month EMI must be a valid.";
     }
-    if (!total_amount.toString().trim()) {
-      errors.total_amount = "Total Amount cannot be empty.";
+ 
+    if (!total_amount.toString().trim() || isNaN(total_amount)) {
+      errors.total_amount = "Total Amount must be a valid.";
     }
     if (
       chitties.some(
-        (chitty) => chitty.chitty_code === chitty_code && !isEditMode
+        (chitty) =>
+          chitty.chitty_code === chitty_code && chitty.id !== editId
       )
     ) {
-      errors.chitty_code = "Chitty CODE already exists.";
+      errors.chitty_code = "Chitty Code already exists.";
     }
-
+  
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
-
+  // Function to clear errors
+  const clearErrors = () => {
+    setFormErrors({});
+  };
   const handleAddChitty = async (e) => {
     e.preventDefault();
     if (!validateData()) return;
-
+  
     try {
       if (isEditMode) {
-        await updateChitty(newChitty.id,newChitty);
-        
+        await updateChitty(editId, newChitty); 
         const updatedChitties = chitties.map((chitty) =>
           chitty.id === editId ? newChitty : chitty
         );
@@ -120,9 +126,15 @@ const Chitty = () => {
       });
       setIsModalOpen(false);
     } catch (error) {
-      toast.error("Failed to save chitty.", { toastId:"904"});
+      console.log(error);
+      
+      if (error.code === "ERR_CHITTY_CODE_UNIQUE") {
+        toast.error("Chitty code already exists",{toastId:"910"})
+      } else {
+        toast.error("Failed to save chitty.", { toastId:"904"});
+      }
     }
-  };
+  };  
   const handleSort = (key) => {
     let direction = "ascending";
     if (sortConfig.key === key && sortConfig.direction === "ascending") {
@@ -150,6 +162,7 @@ const Chitty = () => {
   };
 
   const handleCloseModal = () => {
+    clearErrors();
     setIsModalOpen(false);
     setNewChitty({
       chitty_code: "",
@@ -243,7 +256,7 @@ const Chitty = () => {
           </div>
         </div>
 
-        <div className="relative overflow-x-auto shadow-md sm:rounded-lg w-3/4">
+        <div className="relative overflow-x-auto shadow-md pb-5 sm:rounded-lg w-3/4">
           {filteredChitties.length > 0 ? (
             <table className="w-full text-sm text-left text-gray-700">
               <thead className="text-xs text-gray-100 uppercase bg-gradient-to-r from-[#7fb715] to-[#066769]">
@@ -390,7 +403,6 @@ const Chitty = () => {
                       value={newChitty.chitty_code}
                       onChange={handleInputChange}
                       className="block w-full text-md text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-600 focus:border-blue-600 p-2.5"
-                      disabled={isEditMode}
                     />
                     {formErrors.chitty_code && (
                       <p className="text-red-500 text-sm">

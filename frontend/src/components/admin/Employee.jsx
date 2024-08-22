@@ -160,14 +160,14 @@ const Employee = () => {
   const handleAddEmployee = async (e) => {
     e.preventDefault();
     if (!validateData()) return;
-
+  
     const employeeData = {
       employee_name: newEmployee.name,
       employee_code: newEmployee.code,
       employee_mobile: Number(newEmployee.mobile),
       employee_email: newEmployee.email,
     };
-
+  
     try {
       if (isEditMode) {
         await updateEmployee(newEmployee.id, employeeData);
@@ -177,19 +177,36 @@ const Employee = () => {
             : employee
         );
         setEmployees(updatedEmployees);
-        toast.success("Employee updated successfully.",{toastId:"921"});
+        toast.success("Employee updated successfully.", { toastId: "921" });
+        handleCloseModal();
       } else {
         const response = await addEmployee(employeeData);
         const newEmployeeWithId = { ...employeeData, id: response.id };
         setEmployees((prev) => [...prev, newEmployeeWithId]);
-        toast.success("Employee added successfully.",{toastId:"922"});
+        toast.success("Employee added successfully.", { toastId: "922" });
+        handleCloseModal();
       }
     } catch (error) {
-      toast.error("Error occurred while saving employee.",{toastId:"923"});
+      if (error.response && error.response.data && error.response.data.errors) {
+        const errors = error.response.data.errors;
+  
+        const emailError = errors.find(err => err.code === "ERR_EMPLOYEE_EMAIL_UNIQUE");
+        const mobileError = errors.find(err => err.code === "ERR_EMPLOYEE_MOBILE_UNIQUE");
+  
+        if (emailError) {
+          toast.error(emailError.message, { toastId: "923-email" });
+        }
+  
+        if (mobileError) {
+          toast.error(mobileError.message, { toastId: "923-mobile" });
+        }
+      } else {
+        toast.error("Error occurred while saving employee.", { toastId: "923" });
+        handleCloseModal();  
+      }
     }
-
-    handleCloseModal();
   };
+  
 
   const handleEdit = (employeeId) => {
     const employeeToEdit = employees.find(
