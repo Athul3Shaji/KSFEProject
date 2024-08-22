@@ -1,8 +1,10 @@
 const express = require('express')
 const cors = require('cors')
+const dotenv = require("dotenv")
+dotenv.config();
 const loginroute=require('./routes/ksfeRoute')
 const app = express()
-const port = 8000
+const port = process.env.PORT
 
 require('./config/db')
 app.use(cors({
