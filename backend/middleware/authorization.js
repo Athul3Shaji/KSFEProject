@@ -22,10 +22,17 @@ const admin_verifyToken = (req, res, next) => {
         }
         next(); // Proceed to the next middleware or route handler
     } catch (error) {
-        return res.status(400).json({
-            error_code: "INVALID_TOKEN",
-            message: "Invalid token."
-        });
+        if (error.name === 'TokenExpiredError') {
+            return res.status(401).json({
+                error_code: "TOKEN_EXPIRED",
+                message: "Access denied. Token has expired."
+            });
+        } else {
+            return res.status(400).json({
+                error_code: "INVALID_TOKEN",
+                message: "Invalid token."
+            });
+        }
     }
 };
 
@@ -53,10 +60,17 @@ const user_verifyToken = (req, res, next) => {
         }
         next(); // Proceed to the next middleware or route handler
     } catch (error) {
-        return res.status(400).json({
-            error_code: "INVALID_TOKEN",
-            message: "Invalid token."
-        });
+        if (error.name === 'TokenExpiredError') {
+            return res.status(401).json({
+                error_code: "TOKEN_EXPIRED",
+                message: "Access denied. Token has expired."
+            });
+        } else {
+            return res.status(400).json({
+                error_code: "INVALID_TOKEN",
+                message: "Invalid token."
+            });
+        }
     }
 };
 

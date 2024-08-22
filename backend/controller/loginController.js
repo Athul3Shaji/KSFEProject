@@ -36,7 +36,7 @@ const user_login = async (req, res, next) => {
         }
 
         const token = jwt.sign(user["dataValues"], "ksfeproject", {
-            expiresIn: '1d' // Fixed typo from '1hr' to '1h'
+            expiresIn: '1d' 
         });
 
         return res.status(200).json({
@@ -88,7 +88,7 @@ const admin_login = async (req, res, next) => {
         }
 
         const token = jwt.sign(user["dataValues"], "ksfeproject", {
-            expiresIn: '1d' // Fixed typo from '1hr' to '1h'
+            expiresIn: '1d' 
         });
 
         return res.status(200).json({
