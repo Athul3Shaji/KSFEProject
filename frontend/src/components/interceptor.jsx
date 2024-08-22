@@ -10,10 +10,15 @@ const instance = axios.create({
 
 // Request Interceptor
 instance.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-      config.headers['Authorization'] = `Bearer ${token}`;
+  (config) => {   
+    try {
+      const token = localStorage.getItem('accessToken');
+      if (token) {
+        config.headers['Authorization'] = `Bearer ${token}`;
+      }
+    } catch (error) {
+      toast.error('An error occurred while setting up the request.');
+      return Promise.reject(error);
     }
     return config;
   },
@@ -22,31 +27,6 @@ instance.interceptors.request.use(
   }
 );
 
-// Response Interceptor
-instance.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response) {
-      const { status, data } = error.response;
 
-      // Handle token expiration or invalid token
-      if (status === 403) {
-        toast.error('Token expired, returning to login');
-        localStorage.clear();
-        window.location.replace('/login');
-      } else if (data.error_code === 'NO_TOKEN_PROVIDED' || data.error_code === 'INVALID_TOKEN') {
-        toast.error('Token expired, returning to login');
-        localStorage.clear();
-        window.location.replace('/login');
-      }
-    } else if (error.request) {
-      // Handle request errors
-    } else {
-      // Handle other errors
-    }
-
-    return Promise.reject(error);
-  }
-);
 
 export default instance;
