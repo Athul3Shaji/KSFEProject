@@ -219,6 +219,9 @@ const Chitty = () => {
       setCurrentPage(currentPage - 1);
     }
   };
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   return (
     <>
@@ -297,9 +300,9 @@ const Chitty = () => {
                   >
                     <td className="px-2 py-4">{chitty.chitty_code}</td>
                     <td className="px-7 py-4">{chitty.chitty_name}</td>
-                    <td className="px-10 py-4">{chitty.chitty_tenure}</td>
-                    <td className="px-10 py-4">{chitty.per_month_emi}</td>
-                    <td className="px-7 py-4">{chitty.total_amount}</td>
+                    <td className="px-14 py-4">{chitty.chitty_tenure}</td>
+                    <td className="px-14 py-4">{chitty.per_month_emi}</td>
+                    <td className="px-10 py-4">{chitty.total_amount}</td>
                     <td className="px-3 py-4 flex gap-2">
                       <button
                         onClick={() => handleEdit(chitty.id)}

@@ -35,16 +35,17 @@ const Employee = () => {
   const [sortConfig, setSortConfig] = useState({ key: "", direction: "" });
 
   const filteredEmployees = employees.filter((employee) => {
-    const name = employee.name ? employee.name.toLowerCase() : "";
-    const email = employee.email ? employee.email.toLowerCase() : "";
-    const mobile = employee.mobile ? employee.mobile : "";
-
+    const name = employee.employee_name ? employee.employee_name.toLowerCase() : "";
+    const email = employee.employee_email ? employee.employee_email.toLowerCase() : "";
+    const mobile = employee.employee_mobile ? employee.employee_mobile.toString() : "";
+  
     return (
       name.includes(searchTerm.toLowerCase()) ||
       mobile.includes(searchTerm) ||
       email.includes(searchTerm.toLowerCase())
     );
   });
+  
 
   const [currentPage, setCurrentPage] = useState(1);
   const employeesPerPage = 7;
@@ -75,7 +76,7 @@ const Employee = () => {
         const employeesData = await fetchEmployees();
         setEmployees(employeesData);
       } catch (error) {
-        toast.error("Error fetching employees.",{toastId:"920"});
+        toast.error("Error fetching employees.", { toastId: "920" });
       }
     };
     fetchData();
@@ -160,14 +161,14 @@ const Employee = () => {
   const handleAddEmployee = async (e) => {
     e.preventDefault();
     if (!validateData()) return;
-  
+
     const employeeData = {
       employee_name: newEmployee.name,
       employee_code: newEmployee.code,
       employee_mobile: Number(newEmployee.mobile),
       employee_email: newEmployee.email,
     };
-  
+
     try {
       if (isEditMode) {
         await updateEmployee(newEmployee.id, employeeData);
@@ -189,24 +190,29 @@ const Employee = () => {
     } catch (error) {
       if (error.response && error.response.data && error.response.data.errors) {
         const errors = error.response.data.errors;
-  
-        const emailError = errors.find(err => err.code === "ERR_EMPLOYEE_EMAIL_UNIQUE");
-        const mobileError = errors.find(err => err.code === "ERR_EMPLOYEE_MOBILE_UNIQUE");
-  
+
+        const emailError = errors.find(
+          (err) => err.code === "ERR_EMPLOYEE_EMAIL_UNIQUE"
+        );
+        const mobileError = errors.find(
+          (err) => err.code === "ERR_EMPLOYEE_MOBILE_UNIQUE"
+        );
+
         if (emailError) {
           toast.error(emailError.message, { toastId: "923-email" });
         }
-  
+
         if (mobileError) {
           toast.error(mobileError.message, { toastId: "923-mobile" });
         }
       } else {
-        toast.error("Error occurred while saving employee.", { toastId: "923" });
-        handleCloseModal();  
+        toast.error("Error occurred while saving employee.", {
+          toastId: "923",
+        });
+        handleCloseModal();
       }
     }
   };
-  
 
   const handleEdit = (employeeId) => {
     const employeeToEdit = employees.find(
@@ -229,9 +235,9 @@ const Employee = () => {
       setEmployees((prev) =>
         prev.filter((employee) => employee.id !== employeeId)
       );
-      toast.success("Employee deleted successfully.",{toastId:"924"});
+      toast.success("Employee deleted successfully.", { toastId: "924" });
     } catch (error) {
-      toast.error("Error deleting employee.",{toastId:"925"});
+      toast.error("Error deleting employee.", { toastId: "925" });
     }
   };
 
@@ -240,7 +246,9 @@ const Employee = () => {
     setNewEmployee({ id: "", name: "", mobile: "", email: "" });
     setIsEditMode(false);
   };
-
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
   return (
     <>
       <Navbar />
@@ -284,8 +292,11 @@ const Employee = () => {
           <table className="w-full text-sm text-left text-gray-700">
             <thead className="text-xs text-gray-100 uppercase bg-gradient-to-r from-[#7fb715] to-[#066769]">
               <tr>
-                <th scope="col" className="px-2 py-3 cursor-pointer"
-                onClick={() => handleSort("id")}>
+                <th
+                  scope="col"
+                  className="px-2 py-3 cursor-pointer"
+                  onClick={() => handleSort("id")}
+                >
                   Employee ID{" "}
                   {sortConfig.key === "id" &&
                     (sortConfig.direction === "ascending" ? "▲" : "▼")}
@@ -341,14 +352,14 @@ const Employee = () => {
                 >
                   <th
                     scope="row"
-                    className="px-2 py-3 font-medium text-gray-900 whitespace-nowrap text-base"
+                    className="px-5 py-3 font-medium text-gray-900 whitespace-nowrap text-base"
                   >
                     {employee.id}
                   </th>
                   <td className="px-2 py-3 text-base">
                     {employee.employee_name}
                   </td>
-                  <td className="px-2 py-3 text-base">
+                  <td className="px-12 py-3 text-base">
                     {employee.employee_code}
                   </td>
                   <td className="px-2 py-3 text-base">

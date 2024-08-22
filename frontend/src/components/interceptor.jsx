@@ -1,5 +1,7 @@
-import axios from "axios";
-const BASE_URL = "http://localhost:8000";
+import axios from 'axios';
+import { toast } from 'react-toastify';
+
+const BASE_URL = 'http://localhost:8000';
 
 const instance = axios.create({
   baseURL: BASE_URL,
@@ -7,68 +9,44 @@ const instance = axios.create({
 });
 
 // Request Interceptor
-instance.interceptors.request.use((config) => {
-  const token = localStorage.getItem("accesstoken");
-  
-  if (token) {
-    config.headers["Authorization"] = `Bearer ${token}`;
+instance.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
   }
-  
-  return config;
-}, (error) => {
-  return Promise.reject(error);
-});
+);
 
 // Response Interceptor
 instance.interceptors.response.use(
   (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
+  (error) => {
+    if (error.response) {
+      const { status, data } = error.response;
 
-    // Handle token expiration
-    if (error.response && error.response.status === 403 && !originalRequest._retry) {
-      originalRequest._retry = true;
-      
-      try {
-        const accessToken = await refreshAccessToken();
-        axiosPrivate.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
-        return instance(originalRequest);
-      } catch (err) {
+      // Handle token expiration or invalid token
+      if (status === 403) {
+        toast.error('Token expired, returning to login');
         localStorage.clear();
-        window.location.replace("/login");
+        window.location.replace('/login');
+      } else if (data.error_code === 'NO_TOKEN_PROVIDED' || data.error_code === 'INVALID_TOKEN') {
+        toast.error('Token expired, returning to login');
+        localStorage.clear();
+        window.location.replace('/login');
       }
-    }
-
-    // Handle specific errors, such as user denial
-    if (error.response?.data === "User Denied") {
-      localStorage.clear();
-      window.location.replace("/login");
+    } else if (error.request) {
+      // Handle request errors
+    } else {
+      // Handle other errors
     }
 
     return Promise.reject(error);
   }
 );
 
-// Function to refresh the access token
-const refreshAccessToken = async () => {
-  const refreshToken = localStorage.getItem("refreshToken");
-  const data = { refreshTokenSign: refreshToken };
-
-  try {
-    const response = await axios.post(`${BASE_URL}/users/refreshAccessToken`, data);
-    const newAccessToken = response.data?.accessToken;
-
-    if (newAccessToken) {
-      localStorage.setItem("accessToken", newAccessToken);
-      return newAccessToken;
-    } else {
-      throw new Error("Failed to refresh access token");
-    }
-  } catch (err) {
-    localStorage.clear();
-    window.location.replace("/login");
-    return Promise.reject(err);
-  }
-};
-
-export const axiosPrivate = instance;
+export default instance;

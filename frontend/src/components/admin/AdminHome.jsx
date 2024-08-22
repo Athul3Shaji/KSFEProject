@@ -5,6 +5,7 @@ import { MdFeaturedPlayList, MdOutlineStreetview } from "react-icons/md";
 import { IoIosContacts } from "react-icons/io";
 import { PiSignOutBold } from "react-icons/pi";
 import { IoIosArrowForward } from "react-icons/io";
+import { useLogout } from "../services/services";
 
 const AdminHome = () => {
   const navigate = useNavigate();
@@ -25,6 +26,7 @@ const AdminHome = () => {
       setShowChittyMenu(false);
     }
   };
+  const handleLogout = useLogout();
 
   useEffect(() => {
     document.addEventListener("mousedown", handleClickOutside);
@@ -111,7 +113,7 @@ const AdminHome = () => {
           <a
             href="#"
             className="flex flex-col items-center justify-center w-full h-56 p-6 bg-white border border-gray-200 rounded-lg shadow-md hover:bg-gray-50"
-            onClick={() => navigate("/admin")}
+            onClick={handleLogout}
           >
             <PiSignOutBold className="w-20 h-20 mb-4 text-gray-700" />
             <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 text-center">

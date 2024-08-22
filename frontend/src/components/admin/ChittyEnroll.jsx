@@ -147,6 +147,9 @@ const ChittyEnroll = () => {
     }
     setSortConfig({ key, direction });
   };
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm,selectedChitty]);
 
   return (
     <>

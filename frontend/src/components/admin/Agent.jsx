@@ -205,7 +205,9 @@ const Agent = () => {
   const handleNextPage = () => {
     if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
   };
-
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
   return (
     <>
       <Navbar />
@@ -297,8 +299,8 @@ const Agent = () => {
         {agent.id}
       </th>
       <td className="px-2 py-3 text-base">{agent.agent_name}</td>
-      <td className="px-2 py-3 text-base">{agent.agent_code}</td>
-      <td className="px-2 py-3 text-base">{agent.agent_mobile}</td>
+      <td className="px-5 py-3 text-base">{agent.agent_code}</td>
+      <td className="px-5 py-3 text-base">{agent.agent_mobile}</td>
       <td className="px-2 py-3 flex space-x-4">
         <a
           href="#"
