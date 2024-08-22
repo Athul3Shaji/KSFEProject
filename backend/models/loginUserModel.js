@@ -28,7 +28,7 @@ const User = sequelize.define('loginUser', {
 sequelize.sync()
     .then(() => {
         
-        console.log('User table created or already exists.');
+        console.log('Login User table created or already exists.');
     })
     .catch(err => {
         console.error('Error creating table:', err);
