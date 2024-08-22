@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
-export const API_URL = "http://localhost:8000";
+export const API_URL = "http://13.127.215.10:8000";
 
 const axiosInstance = axios.create({
     baseURL: API_URL,
