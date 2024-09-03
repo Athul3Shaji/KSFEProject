@@ -364,8 +364,8 @@ const Chitty = () => {
           >
             <div className="relative bg-white rounded-lg shadow">
               <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t bg-blue-800">
-                <h3 className="text-lg font-semibold text-white">
-                  {isEditMode ? "Edit Employee" : "Add New Employee"}
+                <h3 className="text-lg font-semibold text-white text-center">
+                  {isEditMode ? "Edit Employee" : "Add Chitty"}
                 </h3>
                 <button
                   type="button"

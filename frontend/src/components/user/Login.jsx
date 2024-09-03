@@ -16,7 +16,7 @@ const Login = () => {
     // Check for existing access token and navigate if present
     const token = localStorage.getItem("accessToken");
     if (token) {
-      navigate("/enquiry");
+      navigate("/user");
     }
   }, [navigate]);
 
@@ -49,7 +49,7 @@ const Login = () => {
       if (data?.user_accestoken) {
         localStorage.setItem('accessToken', data.user_accestoken);
         localStorage.setItem('userType', data.user_type);
-        navigate('/enquiry');
+        navigate('/user');
       } else {
         const toastId = toast.error(data?.message || 'An unexpected error occurred.', { toastId: 156 });
         setCurrentToastId(toastId);

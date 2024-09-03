@@ -12,6 +12,8 @@ import ChittyEnroll from "./admin/ChittyEnroll";
 import AdminProtectedRoute from "../components/AdminProtectedRoute";
 import UserProtectedRoute from "../components/UserProtectedRoute";
 import ErrorPage from "./ErrorPage";
+import UserList from "./user/UserList";
+import SwitchPage from "./user/SwitchPage";
 
 const Routing = () => {
   return (
@@ -23,6 +25,8 @@ const Routing = () => {
         {/* User protected routes */}
         <Route element={<UserProtectedRoute />}>
           <Route path="/enquiry" element={<Enquiry />} />
+          <Route path="/userlist" element={<UserList />} />
+          <Route path="/user" element={<SwitchPage />} />
         </Route>
 
         {/* Admin routes */}

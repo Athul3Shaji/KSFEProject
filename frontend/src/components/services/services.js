@@ -6,7 +6,7 @@ export const useLogout = () => {
 
   const logout = () => {
     localStorage.clear();
-    navigate("/login");
+    navigate("/admin");
   };
   return logout;
 };
@@ -176,7 +176,25 @@ export async function fetchUsersByFilter(ids) {
     throw error;
   }
 }
+// Function to fetch users by filter
+export async function fetchUserById(id) { 
+  try {
+    const response = await axiosInstance.get(`/user/${id}` )
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+}
 
+// Functionadd to update user data
+export async function updateUserData(id,userData) {
+  try {
+    const response = await axiosInstance.put(`/user/update/${id}`, userData);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+}
 // // Function to update user data
 // export async function UpdateUserData(id, data) { 
 //   try {
