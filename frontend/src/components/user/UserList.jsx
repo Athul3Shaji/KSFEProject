@@ -26,7 +26,8 @@ const UserList = () => {
   const filteredUsers = users.filter(
     (user) =>
       user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.reference.toLowerCase().includes(searchTerm.toLowerCase())
+      user.reference.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.mobile_number.toString().includes(searchTerm) 
   );
 
   const sortedUsers = [...filteredUsers].sort((a, b) => {

@@ -49,7 +49,7 @@ const Navbar = () => {
           <div className="p-1 rounded-xl bg-white">
             <img src={logo} className="h-8" alt="KSFE Logo" />
           </div>
-          <span className="self-center text-2xl font-semibold whitespace-nowrap text-white italic">
+          <span className="self-center text-2xl font-semibold whitespace-nowrap text-white ">
             Palarivattom
           </span>
         </a>
