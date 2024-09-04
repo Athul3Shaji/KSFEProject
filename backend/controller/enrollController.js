@@ -35,26 +35,28 @@ const add_enroll = async (req, res) => {
         // Update the enrolled_chitties column in the User model
         const user = await User.findByPk(user_id);
         if (user) {
-            // Split the existing enrolled_chitties string into an array of chitty names
-             let enrolledChitties = user.enrolled_chitties ? user.enrolled_chitties.split(', ') : [];
+            // Initialize or get the current enrolled_chitties array
+            let enrolledChitties = user.enrolled_chitties ? user.enrolled_chitties.split(', ') : [];
 
-        // Check if the chittyName is already in the array
-            if (!enrolledChitties.includes(chittyName)) {
-            // If not, add the chittyName to the array
-                 enrolledChitties.push(chittyName);
-             }
-            console.log("object,",enr)
-        // Join the array back into a string
-             user.enrolled_chitties = enrolledChitties.join(', ');
-
-        // Save the updated user instance
-             await user.save();
-             console.log('User enrolled_chitties updated successfully.');
+            if (enroll_status === 1) {
+                // If enroll_status is 1, add the chittyName to the array if not already present
+                if (!enrolledChitties.includes(chittyName)) {
+                    enrolledChitties.push(chittyName);
+                }
+            } else if (enroll_status === 0) {
+                // If enroll_status is 0, remove the chittyName from the array
+                enrolledChitties = enrolledChitties.filter(chitty => chitty !== chittyName);
             }
+
+            // Update the user's enrolled_chitties array
+            user.enrolled_chitties = enrolledChitties.join(', '); // Convert array back to string
+            await user.save();
+            console.log('User enrolled_chitties updated successfully.');
+        }
 
         return res.status(200).json({ message: 'Enroll operation completed successfully.', enroll });
     } catch (err) {
-        console.error('Error in addOrUpdateEnroll:', err);
+        console.error('Error in add_enroll:', err);
         return res.status(500).json({ message: 'An error occurred while processing the request.', error: err.message });
     }
 };

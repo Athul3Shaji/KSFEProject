@@ -41,10 +41,7 @@ const Chitty = sequelize.define('Chitty', {
         args: [1],
         msg: 'ERR_CHITTY_TENURE_MIN|Chitty tenure must be at least 1 month'
       },
-      max: {
-        args: [120],
-        msg: 'ERR_CHITTY_TENURE_MAX|Chitty tenure cannot exceed 120 months'
-      },
+     
     },
   },
   per_month_emi: {

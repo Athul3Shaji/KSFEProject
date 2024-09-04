@@ -10,8 +10,7 @@ const validateChitty = [
       .isLength({ min: 3, max: 100 }).withMessage('Chitty name must be between 3 and 100 characters long'),
   
     body('chitty_tenure')
-      .exists({ checkFalsy: true }).withMessage('Chitty tenure is required')
-      .isInt({ min: 1, max: 120 }).withMessage('Chitty tenure must be an integer between 1 and 120'),
+      .exists({ checkFalsy: true }).withMessage('Chitty tenure is required'),
   
     body('per_month_emi')
       .exists({ checkFalsy: true }).withMessage('Per month EMI is required')

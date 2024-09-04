@@ -40,7 +40,7 @@ const get_chitty = async(req, res)=>{
     try {
         const chitties = await Chitty.findAll({
             where:{isDeleted : false},
-            order:[['createdAt','DESC']]
+            order:[['updatedAt','DESC']]
             
         });
         res.status(200).json(chitties)
