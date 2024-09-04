@@ -15,7 +15,9 @@ const User = sequelize.define('User', {
     mobile_number: {
         type: DataTypes.STRING,
         allowNull: false, // Updated to not allow null values
-       
+        unique: {
+            msg: 'ERR_MOBILE_UNIQUE|Mobile number must be unique'
+        },
         validate: {
             notEmpty: {
                 msg: 'ERR_MOBILE_EMPTY|Mobile number cannot be empty'
