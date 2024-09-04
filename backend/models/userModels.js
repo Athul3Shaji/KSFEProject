@@ -5,9 +5,7 @@ const User = sequelize.define('User', {
     name: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: {
-            msg: 'ERR_NAME_UNIQUE|Name must be unique'
-        },
+      
         validate: {
             notEmpty: {
                 msg: 'ERR_NAME_EMPTY|Name cannot be empty'
@@ -17,6 +15,9 @@ const User = sequelize.define('User', {
     mobile_number: {
         type: DataTypes.STRING,
         allowNull: false, // Updated to not allow null values
+        unique: {
+            msg: 'ERR_MOBILE_UNIQUE|Mobile number must be unique'
+        },
         validate: {
             notEmpty: {
                 msg: 'ERR_MOBILE_EMPTY|Mobile number cannot be empty'

@@ -1,24 +1,17 @@
 const User = require('../models/userModels');
 const { Op, sequelize,Sequelize } = require('sequelize');
-const Chitty = require("../models/chittyModels")
+const Chitty = require("../models/chittyModels");
+const { Enroll } = require('../models/enrollModels');
 
 
 
 const add_user = async (req, res) => {
     try {
-          // Check if a user with the same name already exists
-    let user = await User.findOne({ where: { name: req.body.name } });
-
-    if (user) {
-        // If user exists, update the existing record
-        await user.update(req.body);
-        res.status(201).send(user.toJSON());
-    } else {
+   
         // If user doesn't exist, create a new one
-        user = await User.create(req.body);
+       const user = await User.create(req.body);
         res.status(201).send(user.toJSON());
-    }
-    } catch (error) {
+      } catch (error) {
         console.log(error);
 
         if (error.name === 'SequelizeValidationError' || error.name === 'SequelizeUniqueConstraintError') {
