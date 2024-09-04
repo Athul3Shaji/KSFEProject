@@ -8,8 +8,15 @@ const { Enroll } = require('../models/enrollModels');
 const add_user = async (req, res) => {
     try {
    
-        // If user doesn't exist, create a new one
-       const user = await User.create(req.body);
+        const userData = { ...req.body };
+
+        // Check if follow_up_date is an empty string and set it to the current date if true
+        if (userData.follow_up_date === '') {
+            userData.follow_up_date = new Date(); // Set current date and time
+        }
+
+        // Create a new user
+        const user = await User.create(userData);
         res.status(201).send(user.toJSON());
       } catch (error) {
         console.log(error);

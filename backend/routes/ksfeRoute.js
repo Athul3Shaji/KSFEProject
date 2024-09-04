@@ -41,7 +41,7 @@ router.post('/admin/enroll/status',add_enroll)
 // routes of user
 router.post('/user/add',user_verifyToken,validateUserRequest,add_user)
 router.get('/user',get_users)
-router.get('/user/:id',user_verifyToken,get_user_by_id)
+router.get('/user/:id',get_user_by_id)
 router.put('/user/update/:id',user_verifyToken,validateUserRequest,update_user)
 router.delete('/user/delete/:id',user_verifyToken,delete_user)
 
