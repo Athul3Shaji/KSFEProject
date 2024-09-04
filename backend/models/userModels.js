@@ -1,10 +1,11 @@
 const { DataTypes } = require('sequelize');
-const {sequelize} = require('../config/db'); // Adjust the path to your database configuration
+const { sequelize } = require('../config/db'); // Adjust the path to your database configuration
 
 const User = sequelize.define('User', {
     name: {
         type: DataTypes.STRING,
         allowNull: false,
+      
         validate: {
             notEmpty: {
                 msg: 'ERR_NAME_EMPTY|Name cannot be empty'
@@ -13,78 +14,94 @@ const User = sequelize.define('User', {
     },
     mobile_number: {
         type: DataTypes.STRING,
-        allowNull: true,
-       
+        allowNull: false, // Updated to not allow null values
+        unique: {
+            msg: 'ERR_MOBILE_UNIQUE|Mobile number must be unique'
+        },
+        validate: {
+            notEmpty: {
+                msg: 'ERR_MOBILE_EMPTY|Mobile number cannot be empty'
+            }
+        }
     },
     address: {
         type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-            notEmpty: {
-                msg: 'ERR_ADDRESS_EMPTY|Address cannot be empty'
-            }
-        }
+        allowNull: true
     },
     email: {
         type: DataTypes.STRING,
-        allowNull:true,
-       
+        allowNull: true
     },
     district: {
         type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-            notEmpty: {
-                msg: 'ERR_DISTRICT_EMPTY|District cannot be empty'
-            }
-        }
+        allowNull: true // Adjusted to true as `null` is invalid
     },
     state: {
         type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-            notEmpty: {
-                msg: 'ERR_STATE_EMPTY|State cannot be empty'
-            }
-        }
+        allowNull: true
     },
     pin: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
         validate: {
-            notEmpty: {
-                msg: 'ERR_PIN_EMPTY|PIN cannot be empty'
-            },
             isNumeric: {
                 msg: 'ERR_PIN_NOT_NUMERIC|PIN must be numeric'
             },
             len: {
                 args: [6, 6],
-                msg: 'ERR_PIN_LENGTH|PIN must be  6  characters'
+                msg: 'ERR_PIN_LENGTH|PIN must be 6 characters'
             }
         }
     },
     reference: {
         type: DataTypes.STRING,
-        allowNull: true,
+        allowNull: false, // Updated to not allow null values
+        validate: {
+            notEmpty: {
+                msg: 'ERR_REFERENCE_EMPTY|Reference cannot be empty'
+            }
+        }
     },
     reference_detail: {
         type: DataTypes.STRING,
-        allowNull: true,
+        allowNull: false, // Updated to not allow null values
+        validate: {
+            notEmpty: {
+                msg: 'ERR_REFERENCE_DETAIL_EMPTY|Reference detail cannot be empty'
+            }
+        }
     },
     chitties: {
-        type: DataTypes.JSON, // Store multiple chitty data as JSON array
+        type: DataTypes.JSON,
         allowNull: false,
         validate: {
             notEmpty: {
                 msg: 'ERR_CHITTY_EMPTY|Chitty data cannot be empty'
             },
-            isArray(value) { // Custom validator to check if the value is an array
+            isArray(value) {
                 if (!Array.isArray(value)) {
                     throw new Error('ERR_CHITTY_NOT_ARRAY|Chitty data must be an array');
                 }
             }
         }
+    },
+    enrolled_chitties: {
+        type: DataTypes.JSON,
+        allowNull: true,
+       
+    },
+    notes: {
+        type: DataTypes.STRING,
+        allowNull: false, // Updated to not allow null values
+        validate: {
+            notEmpty: {
+                msg: 'ERR_NOTES_EMPTY|Notes cannot be empty'
+            }
+        }
+    },
+    follow_up_date: {
+        type: DataTypes.DATE,
+        allowNull: true
     },
     isDeleted: {
         type: DataTypes.BOOLEAN,

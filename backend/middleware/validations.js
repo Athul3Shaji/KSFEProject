@@ -23,7 +23,8 @@ const validateChitty = [
   ];
   
 
-  const validateUserRequest = [
+  
+const validateUserRequest = [
     body('name')
         .notEmpty().withMessage('ERR_NAME_EMPTY|Name cannot be empty')
         .isString().withMessage('ERR_NAME_NOT_STRING|Name must be a string'),
@@ -32,27 +33,33 @@ const validateChitty = [
         .isNumeric().withMessage('ERR_MOBILE_NOT_NUMERIC|Mobile number must be numeric')
         .isLength({ min: 10, max: 15 }).withMessage('ERR_MOBILE_LENGTH|Mobile number must be between 10 and 15 characters'),
     body('address')
-        .notEmpty().withMessage('ERR_ADDRESS_EMPTY|Address cannot be empty')
+        .optional()
         .isString().withMessage('ERR_ADDRESS_NOT_STRING|Address must be a string'),
     body('email')
-    .exists({ checkFalsy: false }).withMessage('Chitty name is required'),
-
+        .optional()
+        .isEmail().withMessage('ERR_EMAIL_INVALID|Email must be valid'),
     body('district')
-        .notEmpty().withMessage('ERR_DISTRICT_EMPTY|District cannot be empty')
+        .optional()
         .isString().withMessage('ERR_DISTRICT_NOT_STRING|District must be a string'),
     body('state')
-        .notEmpty().withMessage('ERR_STATE_EMPTY|State cannot be empty')
+        .optional()
         .isString().withMessage('ERR_STATE_NOT_STRING|State must be a string'),
+    body('pin')
+        .optional()
+        .isNumeric().withMessage('ERR_PIN_NOT_NUMERIC|PIN must be numeric')
+        .isLength({ min: 6, max: 6 }).withMessage('ERR_PIN_LENGTH|PIN must be 6 characters'),
     body('reference')
-        .optional() // Allow null or undefined
+        .notEmpty().withMessage('ERR_REFERENCE_EMPTY|Reference cannot be empty')
         .isString().withMessage('ERR_REFERENCE_NOT_STRING|Reference must be a string'),
+    body('reference_detail')
+        .notEmpty().withMessage('ERR_REFERENCE_DETAIL_EMPTY|Reference detail cannot be empty')
+        .isString().withMessage('ERR_REFERENCE_DETAIL_NOT_STRING|Reference detail must be a string'),
     body('chitties')
         .notEmpty().withMessage('ERR_CHITTY_EMPTY|Chitty data cannot be empty')
         .isArray().withMessage('ERR_CHITTY_NOT_ARRAY|Chitty data must be an array'),
-    body('pin')
-        .notEmpty().withMessage('ERR_PIN_EMPTY|PIN cannot be empty')
-        .isNumeric().withMessage('ERR_PIN_NOT_NUMERIC|PIN must be numeric')
-        .isLength({ min: 6, max: 10 }).withMessage('ERR_PIN_LENGTH|PIN must be between 6 and 10 characters'),
+    body('notes')
+        .notEmpty().withMessage('ERR_NOTES_EMPTY|Notes cannot be empty')
+        .isString().withMessage('ERR_NOTES_NOT_STRING|Notes must be a string'),
     (req, res, next) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {

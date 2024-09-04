@@ -5,6 +5,7 @@ const router = express.Router()
 const { add_agent,get_agent_by_id,get_agents,update_agent,delete_agent } = require('../controller/agentController')
 const {add_chitty,get_chitty,get_chitty_by_id,delete_chitty,update_chitty} = require("../controller/chittyController")
 const {add_user, get_users, get_user_by_id, update_user, delete_user, chitty_filter} = require('../controller/userController')
+const {add_enroll}  = require('../controller/enrollController')
 const {validateEmployee,validateAgent,validateChitty,validateUserRequest} =require('../middleware/validations')
 const {admin_verifyToken,user_verifyToken}  = require('../middleware/authorization')
 
@@ -32,6 +33,9 @@ router.get('/admin/chitty',get_chitty)
 router.get('/admin/chitty/:id',admin_verifyToken,get_chitty_by_id)
 router.put('/admin/chitty/update/:id',admin_verifyToken,validateChitty,update_chitty)
 router.delete('/admin/chitty/delete/:id',admin_verifyToken,delete_chitty)
+
+// routes of enroll 
+router.post('/admin/enroll/status',add_enroll)
 
 
 // routes of user
