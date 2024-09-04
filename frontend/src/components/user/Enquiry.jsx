@@ -28,16 +28,6 @@ const Enquiry = () => {
     chitties: [],
     notes: "",
   });
-const nameRef = useRef(null);
-const mobileNumberRef = useRef(null);
-const addressRef = useRef(null);
-const districtRef = useRef(null);
-const stateRef = useRef(null);
-const pinRef = useRef(null);
-const referenceRef = useRef(null);
-const referenceDetailRef = useRef(null);
-const notesRef = useRef(null);
-const chittiesRef = useRef(null);
 
   const [errors, setErrors] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -216,7 +206,13 @@ const chittiesRef = useRef(null);
     if (selectedOption) {
       try {
         const user = await fetchUserById(selectedOption.value);
-        console.log("Fetched user details:", user); // Debugging line
+
+        // Map user.chitties to the correct format for react-select
+        const selectedChitties = user.chitties?.map((chitty) => ({
+          value: chitty.id,
+          label: chitty.chitty_name,
+        })) || [];
+
         setFormData({
           id: user.id,
           name: user.name,
@@ -227,9 +223,19 @@ const chittiesRef = useRef(null);
           state: user.state,
           pin: user.pin,
           reference: user.reference,
-          chitties: user?.chitties,
+          chitties: selectedChitties,
           notes: user.notes,
         });
+        // reference_detail:user.reference_detail,
+        // follow_up_date:user.follow_up_date,
+        // value={formData.reference_detail
+        //   ? {
+        //       value: formData.reference_detail,
+        //       label: formData.reference_detail
+        //     }
+        //   : null}
+        //value={formData.follow_up_date?.slice(0, 10) || ""}
+        
         const stateIndex = states.indexOf(user.state);
         setAvailableDistricts(districts[stateIndex] || []);
         setSuggestions([]); // Clear suggestions after selection
@@ -261,9 +267,7 @@ const chittiesRef = useRef(null);
   const handleChittyChange = (selectedOptions) => {
     setFormData((prevState) => ({
       ...prevState,
-      chitties: selectedOptions
-        ? selectedOptions.map((option) => option.value)
-        : [],
+      chitties: selectedOptions || [],
     }));
   };
 
@@ -274,26 +278,11 @@ const chittiesRef = useRef(null);
     }));
   };
 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formErrors = validate();
-  
-    if (Object.keys(formErrors).length > 0) {
-      setErrors(formErrors);
-      const firstErrorField = Object.keys(formErrors)[0];
-      if (firstErrorField === "name") nameRef.current.focus();
-      if (firstErrorField === "mobile_number") mobileNumberRef.current.focus();
-      if (firstErrorField === "address") addressRef.current.focus();
-      if (firstErrorField === "district") districtRef.current.focus();
-      if (firstErrorField === "state") stateRef.current.focus();
-      if (firstErrorField === "pin") pinRef.current.focus();
-      if (firstErrorField === "reference") referenceRef.current.focus();
-      if (firstErrorField === "reference_detail") referenceDetailRef.current.focus();
-      if (firstErrorField === "notes") notesRef.current.focus();
-      if (firstErrorField === "chitties") chittiesRef.current.focus();
-      return;
-    }
-
+ 
     if (Object.keys(formErrors).length === 0) {
       setIsSubmitted(true);
       try {
@@ -369,7 +358,6 @@ const chittiesRef = useRef(null);
                     }`}
                     type="text"
                     name="name"
-                    ref={nameRef}
                     value={formData.name}
                     onChange={handleChange}
                     placeholder="Name*"
@@ -402,7 +390,6 @@ const chittiesRef = useRef(null);
                   </label>
                   <input
                     maxLength={12}
-                    ref={mobileNumberRef}
                     className={`w-full bg-gray-100 text-gray-900 p-3 rounded-lg focus:outline-none focus:shadow-outline ${
                       errors.mobile_number ? "border-red-500" : ""
                     }`}
@@ -433,7 +420,6 @@ const chittiesRef = useRef(null);
                     }`}
                     type="text"
                     name="address"
-                    ref={addressRef}
                     value={formData.address}
                     onChange={handleChange}
                     placeholder="Address*"
@@ -471,7 +457,6 @@ const chittiesRef = useRef(null);
                   </label>
                   <select
                     name="state"
-                  ref={stateRef}
                     value={formData.state}
                     onChange={handleChange}
                     className={`w-full bg-gray-100 text-gray-900 p-3 rounded-lg focus:outline-none focus:shadow-outline ${
@@ -498,7 +483,6 @@ const chittiesRef = useRef(null);
                     District<sup className="text-red-500">*</sup>
                   </label>
                   <select
-                  ref={districtRef}
                     name="district"
                     value={formData.district}
                     onChange={handleChange}
@@ -529,7 +513,6 @@ const chittiesRef = useRef(null);
                   </label>
                   <input
                     maxLength={6}
-                    ref={pinRef}
                     className={`w-full bg-gray-100 text-gray-900 p-3 rounded-lg focus:outline-none focus:shadow-outline ${
                       errors.pin ? "border-red-500" : ""
                     }`}
@@ -553,7 +536,6 @@ const chittiesRef = useRef(null);
                   </label>
                   <select
                     name="reference"
-                    ref={referenceRef}
                     value={formData.reference}
                     onChange={handleReferenceChange}
                     className={`w-full bg-gray-100 text-gray-900 p-3 rounded-lg focus:outline-none focus:shadow-outline ${
@@ -608,7 +590,6 @@ const chittiesRef = useRef(null);
                           : []
                       }
                       placeholder="Select Detail"
-                      ref={referenceDetailRef}
                       className={`basic-single ${
                         errors.reference_detail ? "border-red-500" : ""
                       }`}
@@ -693,12 +674,9 @@ const chittiesRef = useRef(null);
                   </label>
                   <Select
                     isMulti
-                    value={formData.chitties.map((chittyId) =>
-                      chittyOptions.find((option) => option.value === chittyId)
-                    )}
+                    value={formData.chitties}
                     onChange={handleChittyChange}
                     options={chittyOptions}
-                    ref={chittiesRef}
                     placeholder="Select Chitties"
                     className={`basic-multi-select ${
                       errors.chitties ? "border-red-500" : ""
@@ -760,7 +738,6 @@ const chittiesRef = useRef(null);
                       errors.notes ? "border-red-500" : ""
                     }`}
                     type="text"
-                    ref={notesRef}
                     name="notes"
                     value={formData.notes}
                     onChange={handleChange}

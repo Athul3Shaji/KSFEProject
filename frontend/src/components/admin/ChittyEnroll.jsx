@@ -29,7 +29,6 @@ const ChittyEnroll = () => {
   const [selectedReferenceDetail, setSelectedReferenceDetail] = useState(null);
   const [followUpDate, setFollowUpDate] = useState();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [statusMap, setStatusMap] = useState({});
   const [chittySet, setChittySet] = useState(null);
 
   useEffect(() => {
@@ -71,10 +70,9 @@ const ChittyEnroll = () => {
     loadUsers();
   }, [selectedChitty]);
 
-  const handleStatusChange = (userId,chittyId, newStatus) => {
+  const handleStatusChange = (userId, chittyId, newStatus) => {
+    console.log(userId, chittyId, newStatus);
 
-    console.log(userId,chittyId,newStatus);
-    
     // Determine the action based on the newStatus
     const action = newStatus === 1 ? "Enroll" : "Unroll";
 
@@ -499,7 +497,9 @@ const ChittyEnroll = () => {
                         )}
                       </td>
                       <td className="px-4 text-center py-3">
-                      {user.enrolled_chitties===null?"Not Enrolled":"Enrolled"} 
+                        {user.enrolled_chitties === null
+                          ? "Not Enrolled"
+                          : "Enrolled"}
                       </td>
                       <td className="px-4 text-center text-blue-700 py-3 text">
                         <button
@@ -546,10 +546,10 @@ const ChittyEnroll = () => {
             onClick={() => toggleModal()} // Click outside content closes modal
           >
             <div
-              className="bg-white pb-2 rounded-2xl shadow-lg w-full max-w-3xl max-h-[90vh] flex flex-col relative"
+              className="bg-white pb-2  w-full max-w-3xl max-h-[90vh] flex flex-col relative"
               onClick={(e) => e.stopPropagation()} // Prevent click inside from closing
             >
-              <h2 className="text-xl bg-blue-700 border-cyan-100 font-bold mb-4 text-white text-center p-4 rounded-t-lg">
+              <h2 className="text-xl bg-gray-700 border-gray-500 border font-bold mb-4 text-white text-center p-4 ">
                 Enrolled Chitties
               </h2>
               <div className="flex-1 overflow-y-auto mb-6 pr-5 pl-4 custom-scrollbar">
@@ -560,46 +560,33 @@ const ChittyEnroll = () => {
                       className="border-b border-neutral-300 pb-2 pt-2"
                     >
                       <div className="mb-2 flex items-center justify-between">
-                      <label className="text-gray-700 text-sm ">
+                        <label className="text-gray-700 text-sm ">
                           {chitty.id}
                         </label>
                         <label className="text-gray-700 text-sm ">
                           {chitty.chitty_name}
                         </label>
-                        
+
                         <div className="flex items-center">
-                          <button
+                          <a
                             onClick={() =>
                               handleStatusChange(
                                 chittySet.id,
                                 chitty.id,
-                                (chitty.enrollStatus = 1)
+                                chitty.enrollStatus === 1
+                                  ? (chitty.enrollStatus = 0)
+                                  : (chitty.enrollStatus = 1)
                               )
                             }
-                            className={`px-4 py-2 rounded-l-2xl ${
+                            className={`px-6 py-2 min-w-[120px] text-center text-white border rounded focus:outline-none focus:ring ${
                               chitty.enrollStatus === 1
-                                ? "bg-blue-600 text-white"
-                                : "bg-gray-300 text-gray-700"
-                            } hover:bg-blue-400 focus:outline-none`}
+                                ? "bg-violet-600 border-violet-600 hover:bg-transparent hover:text-violet-600 active:text-violet-500"
+                                : "bg-gray-300 text-gray-700 border-gray-300 hover:bg-transparent hover:text-gray-700 active:text-gray-500"
+                            }`}
+                            href="#"
                           >
-                            Enroll
-                          </button>
-                          <button
-                            onClick={() =>
-                              handleStatusChange(
-                                chittySet.id,
-                                chitty.id,
-                                (chitty.enrollStatus = 0)
-                              )
-                            }
-                            className={`px-4 py-2 rounded-r-2xl ${
-                              chitty.enrollStatus === 0
-                                ? "bg-blue-700 text-white"
-                                : "bg-gray-300 text-gray-700"
-                            } hover:bg-blue-400 focus:outline-none`}
-                          >
-                            Unroll
-                          </button>
+                            {chitty.enrollStatus === 1 ? "Enrolled" : "Enroll"}
+                          </a>
                         </div>
                       </div>
                     </div>
@@ -609,7 +596,7 @@ const ChittyEnroll = () => {
               <div className="flex justify-center mt-6">
                 <button
                   onClick={() => toggleModal()} // Close modal
-                  className="bg-red-700 text-white px-4 py-2 w-1/4 rounded-lg hover:bg-red-600"
+                  className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
                 >
                   Close
                 </button>
