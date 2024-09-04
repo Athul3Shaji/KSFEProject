@@ -1,12 +1,23 @@
 const User = require('../models/userModels');
 const { Op, sequelize,Sequelize } = require('sequelize');
+const Chitty = require("../models/chittyModels")
 
 
 
 const add_user = async (req, res) => {
     try {
-        const user = await User.create(req.body);
+          // Check if a user with the same name already exists
+    let user = await User.findOne({ where: { name: req.body.name } });
+
+    if (user) {
+        // If user exists, update the existing record
+        await user.update(req.body);
         res.status(201).send(user.toJSON());
+    } else {
+        // If user doesn't exist, create a new one
+        user = await User.create(req.body);
+        res.status(201).send(user.toJSON());
+    }
     } catch (error) {
         console.log(error);
 
@@ -35,6 +46,7 @@ const get_users = async (req, res) => {
             where: { isDeleted: false },
             order: [['createdAt', 'DESC']]// Filter out soft-deleted users
         });
+        
         res.status(200).json(users);
     } catch (error) {
         console.log(error);
@@ -55,6 +67,21 @@ const get_user_by_id = async (req, res) => {
         if (user.isDeleted) {
             return res.status(400).json({ error: "Cannot update a deleted user" });
         }
+        console.log("---",user.chitties)
+         const chittiesIds = user.chitties;
+
+        // Fetch the Chitty details based on the chittiesIds array
+        const chittiesDetails = await Chitty.findAll({
+            where: {
+                id: chittiesIds,
+                isDeleted: false
+            },
+            attributes: [ 'chitty_name']
+        });
+        const chittyNames = chittiesDetails.map(chitty => chitty.chitty_name);
+        console.log(chittyNames);
+        
+        user.chitties = chittyNames
 
 
         res.status(200).json(user);
