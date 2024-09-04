@@ -181,7 +181,7 @@ const UserList = () => {
                             )}
                           </td>
                           <td className="px-4 text-center py-3">
-                            Not-Enrolled
+                           {user.enrolled_chitties===null?"Not Enrolled":"Enrolled"} 
                           </td>
                         </tr>
                       ))}

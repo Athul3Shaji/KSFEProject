@@ -10,7 +10,7 @@ import {
   fetchEmployees,
   fetchUsers,
   fetchUsersByFilter,
-  fetchUserById
+  fetchUserById,
 } from "../services/services";
 import { toast, ToastContainer } from "react-toastify";
 import { CiSearch } from "react-icons/ci";
@@ -71,7 +71,10 @@ const ChittyEnroll = () => {
     loadUsers();
   }, [selectedChitty]);
 
-  const handleStatusChange = (chittyId, newStatus) => {
+  const handleStatusChange = (userId,chittyId, newStatus) => {
+
+    console.log(userId,chittyId,newStatus);
+    
     // Determine the action based on the newStatus
     const action = newStatus === 1 ? "Enroll" : "Unroll";
 
@@ -87,30 +90,31 @@ const ChittyEnroll = () => {
           newStatus === 1 ? "Enrolled" : "Unrolled"
         }.`
       );
-
-     
     } else {
       console.log("Action cancelled.");
     }
   };
 
   const toggleModal = (id = null) => {
-    console.log(id,"idddddddddddddddddd");
-    
+    console.log(id, "idddddddddddddddddd");
+
     if (id) {
-      fetchUserById(id).then(chit => {
-        setChittySet(chit.chitties || []);
-        setIsModalOpen(true);
-      }).catch(error => {
-        console.error("Error fetching user by ID:", error);
-        toast.error("Error fetching chitties of user", { toastId: "1021" });
-      });
+      fetchUserById(id)
+        .then((chit) => {
+          setChittySet(chit || []);
+          console.log(chit);
+
+          setIsModalOpen(true);
+        })
+        .catch((error) => {
+          console.error("Error fetching user by ID:", error);
+          toast.error("Error fetching chitties of user", { toastId: "1021" });
+        });
     } else {
       // If no ID is provided, simply toggle the modal state
       setIsModalOpen(!isModalOpen);
     }
   };
-  
 
   const usersPerPage = 7;
   const filteredUsers = users
@@ -142,7 +146,7 @@ const ChittyEnroll = () => {
         return userDate === filterDate;
       }
       return true;
-    })
+    });
 
   const sortedUsers = [...filteredUsers].sort((a, b) => {
     if (a[sortConfig.key] < b[sortConfig.key]) {
@@ -460,6 +464,9 @@ const ChittyEnroll = () => {
                     <th scope="col" className="px-4 py-3 text-center">
                       Enroll
                     </th>
+                    <th scope="col" className="px-4 py-3 text-center">
+                      Action
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -482,18 +489,23 @@ const ChittyEnroll = () => {
                         {user?.reference_detail}
                       </td>
                       <td className="px-4 text-center py-3">
-                      {new Date(user.follow_up_date).toLocaleDateString(
-                              "en-GB",
-                              {
-                                day: "numeric",
-                                month: "long",
-                                year: "numeric",
-                              }
-                            )}
+                        {new Date(user.follow_up_date).toLocaleDateString(
+                          "en-GB",
+                          {
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric",
+                          }
+                        )}
                       </td>
-                      <td className="px-4 text-center py-3">Not-Enrolled</td>
+                      <td className="px-4 text-center py-3">
+                      {user.enrolled_chitties===null?"Not Enrolled":"Enrolled"} 
+                      </td>
                       <td className="px-4 text-center text-blue-700 py-3 text">
-                        <button onClick={ ()=>toggleModal(user?.id) } className="">
+                        <button
+                          onClick={() => toggleModal(user?.id)}
+                          className=""
+                        >
                           Enroll
                         </button>
                       </td>
@@ -529,74 +541,82 @@ const ChittyEnroll = () => {
           </div>
         )}
         {isModalOpen && (
-  <div
-    className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50"
-    onClick={() => toggleModal()} // Click outside content closes modal
-  >
-    <div
-      className="bg-white pb-2 rounded-2xl shadow-lg w-full max-w-3xl max-h-[90vh] flex flex-col relative"
-      onClick={(e) => e.stopPropagation()} // Prevent click inside from closing
-    >
-      <h2 className="text-xl bg-blue-700 border-cyan-100 font-bold mb-4 text-white text-center p-4 rounded-t-lg">
-        Enrolled Chitties
-      </h2>
-      <div className="flex-1 overflow-y-auto mb-6 pr-5 pl-4 custom-scrollbar">
-        <ul>
-          {chittySet.map((chitty, index) => (
+          <div
+            className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50"
+            onClick={() => toggleModal()} // Click outside content closes modal
+          >
             <div
-              key={index}
-              className="border-b border-neutral-300 pb-2 pt-2"
+              className="bg-white pb-2 rounded-2xl shadow-lg w-full max-w-3xl max-h-[90vh] flex flex-col relative"
+              onClick={(e) => e.stopPropagation()} // Prevent click inside from closing
             >
-              <div className="mb-2 flex items-center justify-between">
-                <label className="text-gray-700 text-sm ">
-                  {index}
-                </label>
-                <label className="text-gray-700 text-sm ">
-                  {chitty}
-                </label>
-                <div className="flex items-center">
-                  <button
-                    onClick={() =>
-                      handleStatusChange(chitty.id, chitty.enrollStatus=1)
-                    }
-                    className={`px-4 py-2 rounded-l-2xl ${
-                      chitty.enrollStatus === 1
-                        ? "bg-blue-600 text-white"
-                        : "bg-gray-300 text-gray-700"
-                    } hover:bg-blue-400 focus:outline-none`}
-                  >
-                    Enroll
-                  </button>
-                  <button
-                    onClick={() =>
-                      handleStatusChange(chitty.id, chitty.enrollStatus=0)
-                    }
-                    className={`px-4 py-2 rounded-r-2xl ${
-                      chitty.enrollStatus === 0
-                        ? "bg-blue-700 text-white"
-                        : "bg-gray-300 text-gray-700"
-                    } hover:bg-blue-400 focus:outline-none`}
-                  >
-                    Unroll
-                  </button>
-                </div>
+              <h2 className="text-xl bg-blue-700 border-cyan-100 font-bold mb-4 text-white text-center p-4 rounded-t-lg">
+                Enrolled Chitties
+              </h2>
+              <div className="flex-1 overflow-y-auto mb-6 pr-5 pl-4 custom-scrollbar">
+                <ul>
+                  {chittySet.chitties.map((chitty) => (
+                    <div
+                      key={chitty.id}
+                      className="border-b border-neutral-300 pb-2 pt-2"
+                    >
+                      <div className="mb-2 flex items-center justify-between">
+                      <label className="text-gray-700 text-sm ">
+                          {chitty.id}
+                        </label>
+                        <label className="text-gray-700 text-sm ">
+                          {chitty.chitty_name}
+                        </label>
+                        
+                        <div className="flex items-center">
+                          <button
+                            onClick={() =>
+                              handleStatusChange(
+                                chittySet.id,
+                                chitty.id,
+                                (chitty.enrollStatus = 1)
+                              )
+                            }
+                            className={`px-4 py-2 rounded-l-2xl ${
+                              chitty.enrollStatus === 1
+                                ? "bg-blue-600 text-white"
+                                : "bg-gray-300 text-gray-700"
+                            } hover:bg-blue-400 focus:outline-none`}
+                          >
+                            Enroll
+                          </button>
+                          <button
+                            onClick={() =>
+                              handleStatusChange(
+                                chittySet.id,
+                                chitty.id,
+                                (chitty.enrollStatus = 0)
+                              )
+                            }
+                            className={`px-4 py-2 rounded-r-2xl ${
+                              chitty.enrollStatus === 0
+                                ? "bg-blue-700 text-white"
+                                : "bg-gray-300 text-gray-700"
+                            } hover:bg-blue-400 focus:outline-none`}
+                          >
+                            Unroll
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </ul>
+              </div>
+              <div className="flex justify-center mt-6">
+                <button
+                  onClick={() => toggleModal()} // Close modal
+                  className="bg-red-700 text-white px-4 py-2 w-1/4 rounded-lg hover:bg-red-600"
+                >
+                  Close
+                </button>
               </div>
             </div>
-          ))}
-        </ul>
-      </div>
-      <div className="flex justify-center mt-6">
-        <button
-          onClick={() => toggleModal()} // Close modal
-          className="bg-red-700 text-white px-4 py-2 w-1/4 rounded-lg hover:bg-red-600"
-        >
-          Close
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-
+          </div>
+        )}
       </div>
       <ToastContainer position="top-center" limit={1} />
     </>

@@ -268,7 +268,6 @@ const chittiesRef = useRef(null);
   };
 
   const handleReferenceDetailChange = (option) => {
-    console.log("Selected reference detail:", option);
     setFormData((prevState) => ({
       ...prevState,
       reference_detail: option || null,
@@ -324,6 +323,7 @@ const chittiesRef = useRef(null);
           notes: "",
         });
         setSuggestions([]);
+        setErrors({});
       }catch (error) {
         // Check if the error response contains the errors array
         if (error.response && error.response.data && error.response.data.errors) {
