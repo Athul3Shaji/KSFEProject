@@ -223,18 +223,13 @@ const Enquiry = () => {
           state: user.state,
           pin: user.pin,
           reference: user.reference,
+          // reference_detail:user.reference_detail,
+          follow_up_date:user.follow_up_date,
           chitties: selectedChitties,
           notes: user.notes,
         });
-        // reference_detail:user.reference_detail,
-        // follow_up_date:user.follow_up_date,
-        // value={formData.reference_detail
-        //   ? {
-        //       value: formData.reference_detail,
-        //       label: formData.reference_detail
-        //     }
-        //   : null}
-        //value={formData.follow_up_date?.slice(0, 10) || ""}
+        
+        
         
         const stateIndex = states.indexOf(user.state);
         setAvailableDistricts(districts[stateIndex] || []);
@@ -269,7 +264,7 @@ const Enquiry = () => {
       ...prevState,
       chitties: selectedOptions || [],
     }));
-  };
+  };  
 
   const handleReferenceDetailChange = (option) => {
     setFormData((prevState) => ({
@@ -282,12 +277,13 @@ const Enquiry = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formErrors = validate();
- 
+  
     if (Object.keys(formErrors).length === 0) {
       setIsSubmitted(true);
       try {
         const submissionData = {
           ...formData,
+          chitties: formData.chitties.map(chitty => chitty.value), // Save only the IDs
           reference_detail: formData.reference_detail?.label,
         };
         if (formData.id) {
@@ -313,26 +309,15 @@ const Enquiry = () => {
         });
         setSuggestions([]);
         setErrors({});
-      }catch (error) {
-        // Check if the error response contains the errors array
-        if (error.response && error.response.data && error.response.data.errors) {
-          const errorCodes = error.response.data.errors;
-  
-          // Handle specific error codes
-          errorCodes.forEach(err => {
-            if (err.code === 'ERR_MOBILE_UNIQUE') {
-              setErrors({ mobile_number: "*This mobile number already exists." });
-            }
-            // Add other error code handling here as needed
-          });
-        } else {
-          showToast("Failed to submit form.");
-        }
+      } catch (error) {
+        showToast("Failed to submit form.");
       }
     } else {
       setErrors(formErrors);
     }
   };
+  
+  
   
 
   return (
@@ -654,7 +639,7 @@ const Enquiry = () => {
                     }`}
                     type="date"
                     name="follow_up_date"
-                    value={formData.follow_up_date}
+                    value={formData.follow_up_date?.slice(0, 10) || ""}
                     onChange={handleChange}
                     placeholder="Follow-up date"
                     min={new Date().toISOString().split("T")[0]}
