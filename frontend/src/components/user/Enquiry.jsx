@@ -202,43 +202,48 @@ const Enquiry = () => {
     }
   };
 
-  const handleSuggestionSelect = async (selectedOption) => {
-    if (selectedOption) {
-      try {
-        const user = await fetchUserById(selectedOption.value);
+ const handleSuggestionSelect = async (selectedOption) => {
+  if (selectedOption) {
+    try {
+      const user = await fetchUserById(selectedOption.value);
 
-        // Map user.chitties to the correct format for react-select
-        const selectedChitties = user.chitties?.map((chitty) => ({
-          value: chitty.id,
-          label: chitty.chitty_name,
-        })) || [];
+      // Map user.chitties to the correct format for react-select
+      const selectedChitties = user.chitties?.map((chitty) => ({
+        value: chitty.id,
+        label: chitty.chitty_name,
+      })) || [];
+      
+      // Correctly set the reference_detail value
+      const referenceDetailOption = user.reference_detail ? {
+        value: user.reference_detail,
+        label: user.reference_detail,
+      } : null;
 
-        setFormData({
-          id: user.id,
-          name: user.name,
-          mobile_number: user.mobile_number,
-          address: user.address,
-          email: user.email,
-          district: user.district,
-          state: user.state,
-          pin: user.pin,
-          reference: user.reference,
-          // reference_detail:user.reference_detail,
-          follow_up_date:user.follow_up_date,
-          chitties: selectedChitties,
-          notes: user.notes,
-        });
-        
-        
-        
-        const stateIndex = states.indexOf(user.state);
-        setAvailableDistricts(districts[stateIndex] || []);
-        setSuggestions([]); // Clear suggestions after selection
-      } catch (error) {
-        showToast("Failed to fetch user details.");
-      }
+      setFormData({
+        id: user.id,
+        name: user.name,
+        mobile_number: user.mobile_number,
+        address: user.address,
+        email: user.email,
+        district: user.district,
+        state: user.state,
+        pin: user.pin,
+        reference: user.reference,
+        reference_detail:referenceDetailOption, // Set the correct value here
+        follow_up_date:user.follow_up_date,
+        chitties: selectedChitties,
+        notes: user.notes,
+      });
+      
+      const stateIndex = states.indexOf(user.state);
+      setAvailableDistricts(districts[stateIndex] || []);
+      setSuggestions([]); // Clear suggestions after selection
+    } catch (error) {
+      showToast("Failed to fetch user details.");
     }
-  };
+  }
+};
+
 
   const handleReferenceChange = (e) => {
     const { value } = e.target;
@@ -549,7 +554,7 @@ const Enquiry = () => {
                       Reference Detail<sup className="text-red-500">*</sup>
                     </label>
                     <Select
-                      value={formData.reference_detail}
+                      value={formData?.reference_detail}
                       onChange={handleReferenceDetailChange}
                       options={
                         formData.reference === "agent"
