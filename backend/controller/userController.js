@@ -69,9 +69,9 @@ const get_user_by_id = async (req, res) => {
                 id: chittiesIds,
                 isDeleted: false
             },
-            attributes: [ 'chitty_name']
+           
         });
-        const chittyNames = chittiesDetails.map(chitty => chitty.chitty_name);
+        const chittyNames = chittiesDetails.map(chitty => chitty);
         console.log(chittyNames);
         
         user.chitties = chittyNames
