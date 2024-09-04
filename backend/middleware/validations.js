@@ -36,8 +36,7 @@ const validateUserRequest = [
         .optional()
         .isString().withMessage('ERR_ADDRESS_NOT_STRING|Address must be a string'),
     body('email')
-        .optional()
-        .isEmail().withMessage('ERR_EMAIL_INVALID|Email must be valid'),
+        .optional(),
     body('district')
         .optional()
         .isString().withMessage('ERR_DISTRICT_NOT_STRING|District must be a string'),
