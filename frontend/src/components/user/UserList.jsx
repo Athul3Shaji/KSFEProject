@@ -27,7 +27,7 @@ const UserList = () => {
     (user) =>
       user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.reference.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.mobile_number.toString().includes(searchTerm) 
+      user.mobile_number.toString().includes(searchTerm)
   );
 
   const sortedUsers = [...filteredUsers].sort((a, b) => {
@@ -147,7 +147,7 @@ const UserList = () => {
                           Follow-up Date
                         </th>
                         <th scope="col" className="px-4 py-3 text-center">
-                          Enroll
+                          Enrolled
                         </th>
                       </tr>
                     </thead>
@@ -171,7 +171,14 @@ const UserList = () => {
                             {user.reference_detail}
                           </td>
                           <td className="px-4 text-center py-3">
-                            10 June 2024
+                            {new Date(user.follow_up_date).toLocaleDateString(
+                              "en-GB",
+                              {
+                                day: "numeric",
+                                month: "long",
+                                year: "numeric",
+                              }
+                            )}
                           </td>
                           <td className="px-4 text-center py-3">
                             Not-Enrolled

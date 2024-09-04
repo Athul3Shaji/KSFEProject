@@ -195,12 +195,3 @@ export async function updateUserData(id,userData) {
     throw error;
   }
 }
-// // Function to update user data
-// export async function UpdateUserData(id, data) { 
-//   try {
-//     const response = await axiosInstance.put(`/admin/update-user/${id}`, data);
-//     return response.data;
-//   } catch (error) {
-//     throw error;
-//   }
-// }

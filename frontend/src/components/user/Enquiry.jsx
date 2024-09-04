@@ -28,6 +28,16 @@ const Enquiry = () => {
     chitties: [],
     notes: "",
   });
+const nameRef = useRef(null);
+const mobileNumberRef = useRef(null);
+const addressRef = useRef(null);
+const districtRef = useRef(null);
+const stateRef = useRef(null);
+const pinRef = useRef(null);
+const referenceRef = useRef(null);
+const referenceDetailRef = useRef(null);
+const notesRef = useRef(null);
+const chittiesRef = useRef(null);
 
   const [errors, setErrors] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -217,8 +227,6 @@ const Enquiry = () => {
           state: user.state,
           pin: user.pin,
           reference: user.reference,
-          reference_detail: user?.reference_detail || null,
-          follow_up_date: user?.follow_up_date || "",
           chitties: user?.chitties,
           notes: user.notes,
         });
@@ -270,6 +278,22 @@ const Enquiry = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formErrors = validate();
+  
+    if (Object.keys(formErrors).length > 0) {
+      setErrors(formErrors);
+      const firstErrorField = Object.keys(formErrors)[0];
+      if (firstErrorField === "name") nameRef.current.focus();
+      if (firstErrorField === "mobile_number") mobileNumberRef.current.focus();
+      if (firstErrorField === "address") addressRef.current.focus();
+      if (firstErrorField === "district") districtRef.current.focus();
+      if (firstErrorField === "state") stateRef.current.focus();
+      if (firstErrorField === "pin") pinRef.current.focus();
+      if (firstErrorField === "reference") referenceRef.current.focus();
+      if (firstErrorField === "reference_detail") referenceDetailRef.current.focus();
+      if (firstErrorField === "notes") notesRef.current.focus();
+      if (firstErrorField === "chitties") chittiesRef.current.focus();
+      return;
+    }
 
     if (Object.keys(formErrors).length === 0) {
       setIsSubmitted(true);
@@ -300,13 +324,27 @@ const Enquiry = () => {
           notes: "",
         });
         setSuggestions([]);
-      } catch (error) {
-        showToast("Failed to submit form.");
+      }catch (error) {
+        // Check if the error response contains the errors array
+        if (error.response && error.response.data && error.response.data.errors) {
+          const errorCodes = error.response.data.errors;
+  
+          // Handle specific error codes
+          errorCodes.forEach(err => {
+            if (err.code === 'ERR_MOBILE_UNIQUE') {
+              setErrors({ mobile_number: "*This mobile number already exists." });
+            }
+            // Add other error code handling here as needed
+          });
+        } else {
+          showToast("Failed to submit form.");
+        }
       }
     } else {
       setErrors(formErrors);
     }
   };
+  
 
   return (
     <>
@@ -331,6 +369,7 @@ const Enquiry = () => {
                     }`}
                     type="text"
                     name="name"
+                    ref={nameRef}
                     value={formData.name}
                     onChange={handleChange}
                     placeholder="Name*"
@@ -363,6 +402,7 @@ const Enquiry = () => {
                   </label>
                   <input
                     maxLength={12}
+                    ref={mobileNumberRef}
                     className={`w-full bg-gray-100 text-gray-900 p-3 rounded-lg focus:outline-none focus:shadow-outline ${
                       errors.mobile_number ? "border-red-500" : ""
                     }`}
@@ -393,6 +433,7 @@ const Enquiry = () => {
                     }`}
                     type="text"
                     name="address"
+                    ref={addressRef}
                     value={formData.address}
                     onChange={handleChange}
                     placeholder="Address*"
@@ -430,6 +471,7 @@ const Enquiry = () => {
                   </label>
                   <select
                     name="state"
+                  ref={stateRef}
                     value={formData.state}
                     onChange={handleChange}
                     className={`w-full bg-gray-100 text-gray-900 p-3 rounded-lg focus:outline-none focus:shadow-outline ${
@@ -456,6 +498,7 @@ const Enquiry = () => {
                     District<sup className="text-red-500">*</sup>
                   </label>
                   <select
+                  ref={districtRef}
                     name="district"
                     value={formData.district}
                     onChange={handleChange}
@@ -486,6 +529,7 @@ const Enquiry = () => {
                   </label>
                   <input
                     maxLength={6}
+                    ref={pinRef}
                     className={`w-full bg-gray-100 text-gray-900 p-3 rounded-lg focus:outline-none focus:shadow-outline ${
                       errors.pin ? "border-red-500" : ""
                     }`}
@@ -509,6 +553,7 @@ const Enquiry = () => {
                   </label>
                   <select
                     name="reference"
+                    ref={referenceRef}
                     value={formData.reference}
                     onChange={handleReferenceChange}
                     className={`w-full bg-gray-100 text-gray-900 p-3 rounded-lg focus:outline-none focus:shadow-outline ${
@@ -563,6 +608,7 @@ const Enquiry = () => {
                           : []
                       }
                       placeholder="Select Detail"
+                      ref={referenceDetailRef}
                       className={`basic-single ${
                         errors.reference_detail ? "border-red-500" : ""
                       }`}
@@ -652,6 +698,7 @@ const Enquiry = () => {
                     )}
                     onChange={handleChittyChange}
                     options={chittyOptions}
+                    ref={chittiesRef}
                     placeholder="Select Chitties"
                     className={`basic-multi-select ${
                       errors.chitties ? "border-red-500" : ""
@@ -713,6 +760,7 @@ const Enquiry = () => {
                       errors.notes ? "border-red-500" : ""
                     }`}
                     type="text"
+                    ref={notesRef}
                     name="notes"
                     value={formData.notes}
                     onChange={handleChange}
