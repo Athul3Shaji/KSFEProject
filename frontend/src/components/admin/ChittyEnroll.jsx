@@ -11,11 +11,13 @@ import {
   fetchUsers,
   fetchUsersByFilter,
   fetchUserById,
+  updateEnrollment,
 } from "../services/services";
 import { toast, ToastContainer } from "react-toastify";
 import { CiSearch } from "react-icons/ci";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { BsBookmarkPlusFill } from "react-icons/bs";
 
 const ChittyEnroll = () => {
   const [chittiesList, setChittiesList] = useState([]);
@@ -30,6 +32,22 @@ const ChittyEnroll = () => {
   const [followUpDate, setFollowUpDate] = useState();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [chittySet, setChittySet] = useState(null);
+
+  const loadUsers = async () => {
+    try {
+      const chittyId =
+        selectedChitty && selectedChitty?.value !== "ALL"
+          ? [selectedChitty?.value]
+          : [];
+      const usersResponse =
+        chittyId.length > 0
+          ? await fetchUsersByFilter({ chittyIds: chittyId })
+          : await fetchUsers();
+      setUsers(usersResponse);
+    } catch (error) {
+      toast.error("Error fetching users:", { toastId: "122" });
+    }
+  };
 
   useEffect(() => {
     const loadChitties = async () => {
@@ -51,66 +69,74 @@ const ChittyEnroll = () => {
   }, []);
 
   useEffect(() => {
-    const loadUsers = async () => {
-      try {
-        const chittyId =
-          selectedChitty && selectedChitty?.value !== "ALL"
-            ? [selectedChitty?.value]
-            : [];
-        const usersResponse =
-          chittyId.length > 0
-            ? await fetchUsersByFilter({ chittyIds: chittyId })
-            : await fetchUsers();
-        setUsers(usersResponse);
-      } catch (error) {
-        toast.error("Error fetching users:", { toastId: "122" });
-      }
-    };
-
     loadUsers();
   }, [selectedChitty]);
 
-  const handleStatusChange = (userId, chittyId, newStatus) => {
-    console.log(userId, chittyId, newStatus);
+  const isChittyEnrolled = (chittyId) => {
+    // Check if enrolled_chitties is a valid array before using .some()
+    return (
+      Array.isArray(chittySet.enrolled_chitties) &&
+      chittySet.enrolled_chitties.some(
+        (enrolledChitty) => enrolledChitty.id === chittyId
+      )
+    );
+  };
 
-    // Determine the action based on the newStatus
+  // Function to handle status change (enroll/unroll)
+  const handleStatusChange = async (userId, chittyId, newStatus) => {
+    const chittyChange = {
+      user_id: userId,
+      chitty_id: chittyId,
+      enroll_status: newStatus,
+    };
+
     const action = newStatus === 1 ? "Enroll" : "Unroll";
 
-    // Confirmation message
     const confirmChange = window.confirm(
       `Are you sure you want to ${action} this chitty?`
     );
 
     if (confirmChange) {
-      // Update the status
-      console.log(
-        `Chitty ID: ${chittyId} has been ${
-          newStatus === 1 ? "Enrolled" : "Unrolled"
-        }.`
-      );
-    } else {
-      console.log("Action cancelled.");
+      try {
+        const response = await updateEnrollment(chittyChange);
+        toast.success(
+          `Chitty ID: ${chittyId} has been ${
+            newStatus === 1 ? "Enrolled" : "Unrolled"
+          } successfully.`
+        );
+        await refreshModalData(userId);
+      } catch (error) {
+        toast.error(`Failed to ${action} the chitty. Please try again later.`);
+      }
     }
   };
 
-  const toggleModal = (id = null) => {
-    console.log(id, "idddddddddddddddddd");
+  // Function to refresh modal data after enrollment status change
+  const refreshModalData = async (userId) => {
+    try {
+      const updatedUser = await fetchUserById(userId);
+      setChittySet(updatedUser || []);
+    } catch (error) {
+      toast.error("Error refreshing user data.");
+    }
+  };
 
+  // Function to toggle modal and refresh user list on close
+  const toggleModal = (id = null) => {
     if (id) {
       fetchUserById(id)
         .then((chit) => {
           setChittySet(chit || []);
-          console.log(chit);
-
           setIsModalOpen(true);
         })
         .catch((error) => {
-          console.error("Error fetching user by ID:", error);
           toast.error("Error fetching chitties of user", { toastId: "1021" });
         });
     } else {
-      // If no ID is provided, simply toggle the modal state
       setIsModalOpen(!isModalOpen);
+      if (isModalOpen) {
+        loadUsers(); // Ensure `loadUsers` is available in the scope
+      }
     }
   };
 
@@ -411,8 +437,8 @@ const ChittyEnroll = () => {
                 showIcon
                 isClearable
                 onChange={(date) => setFollowUpDate(date)}
-                className="w-full custom-input text-sm text-center bg-gray-200 rounded-3xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 p-2.5"
-                placeholderText="↕ Date "
+                className="w-full custom-input text-sm text-center bg-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 p-2.5"
+                placeholderText=" Date "
                 dateFormat="MMMM d, yyyy"
               />
             </div>
@@ -450,17 +476,11 @@ const ChittyEnroll = () => {
                     <th scope="col" className="px-4 py-3">
                       Mobile
                     </th>
-                    <th scope="col" className="px-4 py-3">
-                      Reference
-                    </th>
-                    <th scope="col" className="px-4 py-3 text-center">
-                      Reference Detail
-                    </th>
                     <th scope="col" className="px-4 py-3 text-center">
                       Follow-up Date
                     </th>
                     <th scope="col" className="px-4 py-3 text-center">
-                      Enroll
+                      Enrolled In
                     </th>
                     <th scope="col" className="px-4 py-3 text-center">
                       Action
@@ -482,10 +502,6 @@ const ChittyEnroll = () => {
                       </td>
                       <td className="px-4 py-3">{user?.name}</td>
                       <td className="px-4 py-3">{user?.mobile_number}</td>
-                      <td className="px-4 py-3">{user?.reference}</td>
-                      <td className="px-4 text-center py-3">
-                        {user?.reference_detail}
-                      </td>
                       <td className="px-4 text-center py-3">
                         {new Date(user.follow_up_date).toLocaleDateString(
                           "en-GB",
@@ -497,16 +513,41 @@ const ChittyEnroll = () => {
                         )}
                       </td>
                       <td className="px-4 text-center py-3">
-                        {user.enrolled_chitties === null
-                          ? "Not Enrolled"
-                          : "Enrolled"}
+                        {user.enrolled_chitties ? (
+                          <div className="text-left">
+                            {(() => {
+                              // Parse the JSON string into an array
+                              const enrolledChittiesArray = JSON.parse(
+                                user.enrolled_chitties
+                              );
+
+                              // Check if the parsed value is an array and has elements
+                              if (
+                                Array.isArray(enrolledChittiesArray) &&
+                                enrolledChittiesArray.length > 0
+                              ) {
+                                return enrolledChittiesArray.map(
+                                  (chitty, index) => (
+                                    <li key={index} className="py-1">
+                                      {chitty.name}
+                                    </li>
+                                  )
+                                );
+                              } else {
+                                return "Not Enrolled";
+                              }
+                            })()}
+                          </div>
+                        ) : (
+                          "Not Enrolled"
+                        )}
                       </td>
                       <td className="px-4 text-center text-blue-700 py-3 text">
                         <button
                           onClick={() => toggleModal(user?.id)}
-                          className=""
+                          className="flex "
                         >
-                          Enroll
+                          Enroll<BsBookmarkPlusFill className="ml-1 mt-1"/>
                         </button>
                       </td>
                     </tr>
@@ -554,43 +595,45 @@ const ChittyEnroll = () => {
               </h2>
               <div className="flex-1 overflow-y-auto mb-6 pr-5 pl-4 custom-scrollbar">
                 <ul>
-                  {chittySet.chitties.map((chitty) => (
-                    <div
-                      key={chitty.id}
-                      className="border-b border-neutral-300 pb-2 pt-2"
-                    >
-                      <div className="mb-2 flex items-center justify-between">
-                        <label className="text-gray-700 text-sm ">
-                          {chitty.id}
-                        </label>
-                        <label className="text-gray-700 text-sm ">
-                          {chitty.chitty_name}
-                        </label>
+                  {chittySet.chitties.map((chitty) => {
+                    const enrolled = isChittyEnrolled(chitty.id);
 
-                        <div className="flex items-center">
-                          <a
-                            onClick={() =>
-                              handleStatusChange(
-                                chittySet.id,
-                                chitty.id,
-                                chitty.enrollStatus === 1
-                                  ? (chitty.enrollStatus = 0)
-                                  : (chitty.enrollStatus = 1)
-                              )
-                            }
-                            className={`px-6 py-2 min-w-[120px] text-center text-white border rounded focus:outline-none focus:ring ${
-                              chitty.enrollStatus === 1
-                                ? "bg-violet-600 border-violet-600 hover:bg-transparent hover:text-violet-600 active:text-violet-500"
-                                : "bg-gray-300 text-gray-700 border-gray-300 hover:bg-transparent hover:text-gray-700 active:text-gray-500"
-                            }`}
-                            href="#"
-                          >
-                            {chitty.enrollStatus === 1 ? "Enrolled" : "Enroll"}
-                          </a>
+                    return (
+                      <div
+                        key={chitty.id}
+                        className="border-b border-neutral-300 pb-2 pt-2"
+                      >
+                        <div className="mb-2 flex items-center justify-between">
+                          <label className="text-gray-700 text-sm">
+                            {chitty.id}
+                          </label>
+                          <label className="text-gray-700 text-sm">
+                            {chitty.chitty_name}
+                          </label>
+
+                          <div className="flex items-center">
+                            <a
+                              onClick={() =>
+                                handleStatusChange(
+                                  chittySet.id,
+                                  chitty.id,
+                                  enrolled ? 0 : 1
+                                )
+                              }
+                              className={`px-6 py-2 min-w-[120px] text-center text-white border rounded focus:outline-none focus:ring ${
+                                enrolled
+                                  ? "bg-violet-600 border-violet-600 hover:bg-transparent hover:text-violet-600 active:text-violet-500"
+                                  : "bg-gray-300 text-gray-700 border-gray-300 hover:bg-transparent hover:text-gray-700 active:text-gray-500"
+                              }`}
+                              href="#"
+                            >
+                              {enrolled ? "Enrolled" : "Enroll"}
+                            </a>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </ul>
               </div>
               <div className="flex justify-center mt-6">

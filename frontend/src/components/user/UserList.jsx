@@ -181,8 +181,35 @@ const UserList = () => {
                             )}
                           </td>
                           <td className="px-4 text-center py-3">
-                           {user.enrolled_chitties===null?"Not Enrolled":"Enrolled"} 
-                          </td>
+                        {user.enrolled_chitties ? (
+                          <div className="text-left">
+                            {(() => {
+                              // Parse the JSON string into an array
+                              const enrolledChittiesArray = JSON.parse(
+                                user.enrolled_chitties
+                              );
+
+                              // Check if the parsed value is an array and has elements
+                              if (
+                                Array.isArray(enrolledChittiesArray) &&
+                                enrolledChittiesArray.length > 0
+                              ) {
+                                return enrolledChittiesArray.map(
+                                  (chitty, index) => (
+                                    <li key={index} className="py-1">
+                                      {chitty.name}
+                                    </li>
+                                  )
+                                );
+                              } else {
+                                return "Not Enrolled";
+                              }
+                            })()}
+                          </div>
+                        ) : (
+                          "Not Enrolled"
+                        )}
+                      </td>
                         </tr>
                       ))}
                     </tbody>
