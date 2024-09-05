@@ -191,7 +191,43 @@ const ChittyEnroll = () => {
   };
   const handleExportPDF = () => {
     const doc = new jsPDF();
-    doc.text(`${selectedChitty.label}`, 20, 10);
+    
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text(
+      `${selectedChitty.label}`,
+      doc.internal.pageSize.getWidth() / 2,
+      20,
+      { align: 'center' }
+    );
+    
+    const body = sortedUsers.map((user) => {
+      let enrolledChittiesDisplay = "Not Enrolled";
+      try {
+        const enrolledChittiesArray = JSON.parse(user.enrolled_chitties);
+        if (
+          Array.isArray(enrolledChittiesArray) &&
+          enrolledChittiesArray.length > 0
+        ) {
+          enrolledChittiesDisplay = enrolledChittiesArray
+            .map((chitty) => `• ${chitty.name}`)
+            .join("\n");
+        }
+      } catch (e) {
+        console.error("Failed to parse enrolled_chitties:", e);
+      }
+  
+      return [
+        user.id,
+        user.name,
+        user.mobile_number,
+        user.email,
+        user.reference,
+        user.reference_detail,
+        enrolledChittiesDisplay,
+      ];
+    });
+  
     doc.autoTable({
       head: [
         [
@@ -199,34 +235,39 @@ const ChittyEnroll = () => {
           "Name",
           "Mobile",
           "Email",
-          "District",
-          "State",
           "Reference",
           "Reference Detail",
+          "Enrolled Chitties",
         ],
       ],
-      body: sortedUsers.map((user) => [
-        user.id,
-        user.name,
-        user.mobile_number,
-        user.email,
-        user.district,
-        user.state,
-        user.reference,
-        user.reference_detail,
-      ]),
+      body: body,
+      headStyles: {
+        fillColor: [169, 169, 169],
+        textColor: [0, 0, 0],
+        halign: 'center',
+      },
+      styles: {
+        cellPadding: 3,
+        fontSize: 10,
+        valign: 'middle',
+        halign: 'left',
+        lineWidth: 0.1,
+        lineColor: [0, 0, 0],
+      },
+      margin: { top: 30 },
+      tableLineColor: [0, 0, 0],
+      tableLineWidth: 0.1,
     });
-    // Generate current date and time in DDMMYYYY_HHMM format
+  
     const now = new Date();
     const day = String(now.getDate()).padStart(2, "0");
-    const month = String(now.getMonth() + 1).padStart(2, "0"); // Months are 0-based
+    const month = String(now.getMonth() + 1).padStart(2, "0");
     const year = now.getFullYear();
     const timestamp = `${day}${month}${year}`;
-
-    // Save the file with timestamp in the filename
+  
     doc.save(`${selectedChitty.label}- ${timestamp}.pdf`);
   };
-
+  
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
   };
@@ -476,6 +517,12 @@ const ChittyEnroll = () => {
                     <th scope="col" className="px-4 py-3">
                       Mobile
                     </th>
+                    <th scope="col" className="px-4 py-3">
+                      Reference
+                    </th>
+                    <th scope="col" className="px-4 text-center py-3">
+                      Reference Detail
+                    </th>
                     <th scope="col" className="px-4 py-3 text-center">
                       Follow-up Date
                     </th>
@@ -502,6 +549,9 @@ const ChittyEnroll = () => {
                       </td>
                       <td className="px-4 py-3">{user?.name}</td>
                       <td className="px-4 py-3">{user?.mobile_number}</td>
+                      <td className="px-4 py-3">{user?.reference}</td>
+                      <td className="px-4 py-3">{user?.reference_detail}</td>
+
                       <td className="px-4 text-center py-3">
                         {new Date(user.follow_up_date).toLocaleDateString(
                           "en-GB",
@@ -547,7 +597,8 @@ const ChittyEnroll = () => {
                           onClick={() => toggleModal(user?.id)}
                           className="flex "
                         >
-                          Enroll<BsBookmarkPlusFill className="ml-1 mt-1"/>
+                          Enroll
+                          <BsBookmarkPlusFill className="ml-1 mt-1" />
                         </button>
                       </td>
                     </tr>
@@ -622,7 +673,7 @@ const ChittyEnroll = () => {
                               }
                               className={`px-6 py-2 min-w-[120px] text-center text-white border rounded focus:outline-none focus:ring ${
                                 enrolled
-                                  ? "bg-violet-600 border-violet-600 hover:bg-transparent hover:text-violet-600 active:text-violet-500"
+                                  ? "bg-blue-600 border-blue-600 hover:bg-transparent hover:text-blue-600 active:text-violet-500"
                                   : "bg-gray-300 text-gray-700 border-gray-300 hover:bg-transparent hover:text-gray-700 active:text-gray-500"
                               }`}
                               href="#"
@@ -639,7 +690,7 @@ const ChittyEnroll = () => {
               <div className="flex justify-center mt-6">
                 <button
                   onClick={() => toggleModal()} // Close modal
-                  className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+                  className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
                 >
                   Close
                 </button>
