@@ -69,6 +69,8 @@ const get_user_by_id = async (req, res) => {
         }
         console.log("---",user.chitties)
          const chittiesIds = user.chitties;
+         let enrolledChitties = JSON.parse(user.enrolled_chitties);
+
 
         // Fetch the Chitty details based on the chittiesIds array
         const chittiesDetails = await Chitty.findAll({
@@ -82,6 +84,7 @@ const get_user_by_id = async (req, res) => {
         console.log(chittyNames);
         
         user.chitties = chittyNames
+        user.enrolled_chitties = enrolledChitties
 
 
         res.status(200).json(user);

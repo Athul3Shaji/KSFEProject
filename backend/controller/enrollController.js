@@ -7,20 +7,24 @@ const add_enroll = async (req, res) => {
     try {
         const { user_id, chitty_id, enroll_status } = req.body;
         console.log(req.body);
-
-        // Check if the record exists
+    
+        // Check if the enroll record exists
         let enroll = await Enroll.findOne({ where: { user_id, chitty_id } });
-
+    
         // Fetch the chitty details using the chitty_id
         const chittyDetails = await Chitty.findByPk(chitty_id);
-
+    
         if (!chittyDetails) {
             return res.status(404).json({ message: 'Chitty not found.' });
         }
-
-        // Get the chitty name
-        const chittyName = chittyDetails.chitty_name;
-
+    
+        // Create an object with chitty_id and chitty_name
+        const chittyInfo = {
+            id: chittyDetails.id,
+            name: chittyDetails.chitty_name
+        };
+        console.log('Chitty Info:', chittyInfo);
+    
         if (enroll) {
             // If the record exists, update it
             enroll.enroll_status = enroll_status;
@@ -31,34 +35,36 @@ const add_enroll = async (req, res) => {
             enroll = await Enroll.create({ user_id, chitty_id, enroll_status });
             console.log('Enroll record created successfully.');
         }
-
+    
         // Update the enrolled_chitties column in the User model
         const user = await User.findByPk(user_id);
         if (user) {
-            // Initialize or get the current enrolled_chitties array
-            let enrolledChitties = user.enrolled_chitties ? user.enrolled_chitties.split(', ') : [];
-
+            // Initialize or get the current enrolled_chitties array (as JSON objects)
+            let enrolledChitties = user.enrolled_chitties ? JSON.parse(user.enrolled_chitties) : [];
+    
             if (enroll_status === 1) {
-                // If enroll_status is 1, add the chittyName to the array if not already present
-                if (!enrolledChitties.includes(chittyName)) {
-                    enrolledChitties.push(chittyName);
+                // If enroll_status is 1, add the chittyInfo if not already present
+                const exists = enrolledChitties.some(chitty => chitty.id === chitty_id);
+                if (!exists) {
+                    enrolledChitties.push(chittyInfo);
                 }
             } else if (enroll_status === 0) {
-                // If enroll_status is 0, remove the chittyName from the array
-                enrolledChitties = enrolledChitties.filter(chitty => chitty !== chittyName);
+                // If enroll_status is 0, remove the chittyInfo by chitty_id
+                enrolledChitties = enrolledChitties.filter(chitty => chitty.id !== chitty_id);
             }
-
-            // Update the user's enrolled_chitties array
-            user.enrolled_chitties = enrolledChitties.join(', '); // Convert array back to string
+    
+            // Update the user's enrolled_chitties array as a JSON string
+            user.enrolled_chitties = JSON.stringify(enrolledChitties);
             await user.save();
             console.log('User enrolled_chitties updated successfully.');
         }
-
+    
         return res.status(200).json({ message: 'Enroll operation completed successfully.', enroll });
     } catch (err) {
         console.error('Error in add_enroll:', err);
         return res.status(500).json({ message: 'An error occurred while processing the request.', error: err.message });
     }
+    
 };
 
 module.exports = { add_enroll };
