@@ -195,3 +195,13 @@ export async function updateUserData(id,userData) {
     throw error;
   }
 }
+
+// Functionadd to update user data
+export async function updateEnrollment(userData) {
+  try {
+    const response = await axiosInstance.post(`/admin/enroll/status`, userData);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+}
