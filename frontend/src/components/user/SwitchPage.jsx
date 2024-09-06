@@ -20,13 +20,13 @@ const SwitchPage = () => {
               onClick={() => handleTabClick("enquiry")}
               className={`px-4 py-2 text-lg font-semibold ${activeComponent === "enquiry" ? "border-b-4 rounded border-blue-600 text-blue-600" : "text-gray-600 hover:text-blue-600"}`}
             >
-              Add User
+              Add / Search User
             </button>
             <button
               onClick={() => handleTabClick("userList")}
               className={`px-4 py-2 text-lg font-semibold ${activeComponent === "userList" ? "border-b-4 rounded border-blue-600 text-blue-600" : "text-gray-600 hover:text-blue-600"}`}
             >
-              List
+              List Enrollments
             </button>
           </div>
           <div className="bg-gray-100 p-6 rounded-lg shadow-md">

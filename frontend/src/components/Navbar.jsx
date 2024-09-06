@@ -107,7 +107,7 @@ const Navbar = () => {
 
         {userType === "admin" && (
           <div
-            className={`absolute top-16 left-0 right-0 bg-[#06296b] text-white md:relative md:top-auto md:left-auto md:right-auto md:bg-[#06296b] md:flex md:items-center md:w-auto md:space-x-8 md:mt-0 md:border-0 ${
+            className={`absolute top-16 left-0 right-0 mr-40 bg-[#06296b] text-white md:relative md:top-auto md:left-auto md:right-auto md:bg-[#06296b] md:flex md:items-center md:w-auto md:space-x-8 md:mt-0 md:border-0 ${
               isMobileMenuOpen ? "block" : "hidden"
             }`}
             id="navbar-menu"

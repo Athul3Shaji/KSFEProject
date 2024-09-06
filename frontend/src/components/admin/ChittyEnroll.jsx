@@ -367,7 +367,7 @@ const ChittyEnroll = () => {
                 type="text"
                 id="search"
                 className="w-full text-sm text-gray-900 bg-gray-50 rounded-lg border-0 focus:outline-none focus:ring-0 p-2.5"
-                placeholder="Search"
+                placeholder="name or mobile"
                 value={searchTerm}
                 onChange={handleSearchChange}
               />
@@ -376,7 +376,11 @@ const ChittyEnroll = () => {
             <div className="ml-auto">
               <button
                 onClick={handleExportPDF}
-                className="flex items-center justify-center bg-[#252eb1] text-gray-100 font-semibold py-2 px-8 w-44 rounded-lg hover:opacity-90"
+                className={`flex items-center justify-center bg-[#252eb1] text-gray-100 font-semibold py-2 px-8 w-44 rounded-lg hover:opacity-90 ${
+                  !selectedChitty ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+                disabled={!selectedChitty}
+                title={!selectedChitty ? 'Please select a chitty to export' : ''}
               >
                 Export <MdPictureAsPdf className="w-5 h-5 ml-2" />
               </button>
@@ -404,34 +408,6 @@ const ChittyEnroll = () => {
               className="w-full rounded-2xl md:w-48 text-sm"
               placeholder="Reference"
               value={selectedReference}
-              styles={{
-                control: (provided, state) => ({
-                  ...provided,
-                  backgroundColor: "#f7fafc", // Tailwind `bg-gray-100`
-                  color: "#1a202c", // Tailwind `text-gray-900`
-                  padding: "0.3rem", // Tailwind `p-3`
-                  borderRadius: "1.75rem", // Tailwind `rounded-lg`
-                  boxShadow: state.isFocused
-                    ? "0 0 0 3px rgba(66, 153, 225, 0.5)"
-                    : null, // Tailwind `focus:shadow-outline`
-                }),
-                menu: (provided) => ({
-                  ...provided,
-                  borderRadius: "0.75rem", // Tailwind `rounded-lg`
-                  boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)", // Tailwind `shadow-sm`
-                  backgroundColor: "#ffffff",
-                }),
-                option: (provided, state) => ({
-                  ...provided,
-                  backgroundColor: state.isSelected
-                    ? "#3182ce" // Tailwind `bg-blue-500`
-                    : state.isFocused
-                    ? "#ebf8ff" // Tailwind `bg-blue-100`
-                    : "#ffffff", // Tailwind `bg-white`
-                  color: state.isSelected ? "#ffffff" : "#1a202c",
-                  paddingLeft: "0.75rem",
-                }),
-              }}
             />
             {selectedReference && selectedReference.value !== "all" && (
               <Select
@@ -443,33 +419,7 @@ const ChittyEnroll = () => {
                 onChange={(selectedOption) =>
                   setSelectedReferenceDetail(selectedOption)
                 }
-                styles={{
-                  control: (provided, state) => ({
-                    ...provided,
-                    backgroundColor: "#f7fafc", // Tailwind `bg-gray-100`
-                    color: "#1a202c", // Tailwind `text-gray-900`
-                    padding: "0.3rem", // Tailwind `p-3`
-                    borderRadius: "1.75rem", // Tailwind `rounded-lg`
-                    boxShadow: state.isFocused
-                      ? "0 0 0 3px rgba(66, 153, 225, 0.5)"
-                      : null, // Tailwind `focus:shadow-outline`
-                  }),
-                  menu: (provided) => ({
-                    ...provided,
-                    borderRadius: "0.75rem", // Tailwind `rounded-lg`
-                    boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)", // Tailwind `shadow-sm`
-                    backgroundColor: "#ffffff", // Tailwind `bg-white`
-                  }),
-                  option: (provided, state) => ({
-                    ...provided,
-                    backgroundColor: state.isSelected
-                      ? "#3182ce" // Tailwind `bg-blue-500`
-                      : state.isFocused
-                      ? "#ebf8ff" // Tailwind `bg-blue-100`
-                      : "#ffffff", // Tailwind `bg-white`
-                    color: state.isSelected ? "#ffffff" : "#1a202c",
-                  }),
-                }}
+                
               />
             )}
             <div className="w-full md:w-48">
@@ -564,7 +514,7 @@ const ChittyEnroll = () => {
                       </td>
                       <td className="px-4 text-center py-3">
                         {user.enrolled_chitties ? (
-                          <div className="text-left">
+                          <div className="text-center">
                             {(() => {
                               // Parse the JSON string into an array
                               const enrolledChittiesArray = JSON.parse(
@@ -578,7 +528,7 @@ const ChittyEnroll = () => {
                               ) {
                                 return enrolledChittiesArray.map(
                                   (chitty, index) => (
-                                    <li key={index} className="py-1">
+                                    <li key={index} className="py-1 text-left">
                                       {chitty.name}
                                     </li>
                                   )

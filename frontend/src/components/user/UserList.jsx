@@ -98,7 +98,7 @@ const UserList = () => {
                 type="text"
                 id="search"
                 className="w-full text-sm text-gray-900 bg-gray-50 rounded-lg border-0 focus:outline-none focus:ring-0 p-2.5"
-                placeholder="Search"
+                placeholder="name or mobile"
                 value={searchTerm}
                 onChange={handleSearchChange}
               />
