@@ -18,6 +18,8 @@ import { CiSearch } from "react-icons/ci";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { BsBookmarkPlusFill } from "react-icons/bs";
+import { confirmAlert } from "react-confirm-alert";
+import "react-confirm-alert/src/react-confirm-alert.css";
 
 const ChittyEnroll = () => {
   const [chittiesList, setChittiesList] = useState([]);
@@ -83,6 +85,27 @@ const ChittyEnroll = () => {
   };
 
   // Function to handle status change (enroll/unroll)
+  const submit = () => {
+    confirmAlert({
+      title: "Confirm to submit",
+      message: "Are you sure to do this.",
+      buttons: [
+        {
+          label: "Yes",
+          className:
+            "bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600", // Tailwind class for 'Yes' button
+          onClick: () => toast.success("Action confirmed!"),
+        },
+        {
+          label: "No",
+          className: "bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600", // Tailwind class for 'No' button
+          onClick: () => toast.info("Action cancelled!"),
+        },
+      ],
+    });
+  };
+
+  // Handle status change logic
   const handleStatusChange = async (userId, chittyId, newStatus) => {
     const chittyChange = {
       user_id: userId,
@@ -90,25 +113,39 @@ const ChittyEnroll = () => {
       enroll_status: newStatus,
     };
 
-    const action = newStatus === 1 ? "Enroll" : "Unroll";
-
-    const confirmChange = window.confirm(
-      `Are you sure you want to ${action} this chitty?`
-    );
-
-    if (confirmChange) {
-      try {
-        const response = await updateEnrollment(chittyChange);
-        toast.success(
-          `Chitty ID: ${chittyId} has been ${
-            newStatus === 1 ? "Enrolled" : "Unrolled"
-          } successfully.`
-        );
-        await refreshModalData(userId);
-      } catch (error) {
-        toast.error(`Failed to ${action} the chitty. Please try again later.`);
-      }
-    }
+    const action = newStatus === 1 ? "Enroll" : "UnEnroll";
+    confirmAlert({
+      title: `Confirm to ${action}`,
+      message: `Are you sure you want to ${action} this chitty?`,
+      buttons: [
+        {
+          label: "Yes",
+          className:
+            "bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600", // Tailwind class for 'Yes' button
+          onClick: async () => {
+            try {
+              const response = await updateEnrollment(chittyChange);
+              toast.success(
+                `Chitty has been ${
+                  newStatus === 1 ? "Enrolled" : "Unrolled"
+                } successfully.`
+              );
+              await refreshModalData(userId); // Refresh data after successful action
+            } catch (error) {
+              toast.error(
+                `Failed to ${action} the chitty. Please try again later.`
+              );
+            }
+          },
+        },
+        {
+          label: "No",
+          className:
+            "bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600", // Tailwind class for 'No' button
+          onClick: () => toast.info(`Cancelled ${action} of chitty`),
+        },
+      ],
+    });
   };
 
   // Function to refresh modal data after enrollment status change
@@ -145,6 +182,7 @@ const ChittyEnroll = () => {
     .filter(
       (user) =>
         user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.mobile_number.toString().includes(searchTerm) ||
         user.reference.toLowerCase().includes(searchTerm.toLowerCase())
     )
     .filter((user) =>
@@ -160,7 +198,8 @@ const ChittyEnroll = () => {
     .filter((user) =>
       selectedReferenceDetail &&
       selectedReferenceDetail.value.toLowerCase() !== "all"
-        ? user.reference_detail === selectedReferenceDetail.value
+        ? user.reference_detail?.toLowerCase().trim() ===
+          selectedReferenceDetail.value.toLowerCase().trim()
         : true
     )
     .filter((user) => {
@@ -191,16 +230,16 @@ const ChittyEnroll = () => {
   };
   const handleExportPDF = () => {
     const doc = new jsPDF();
-    
+
     doc.setFontSize(14);
-    doc.setFont('helvetica', 'bold');
+    doc.setFont("helvetica", "bold");
     doc.text(
       `${selectedChitty.label}`,
       doc.internal.pageSize.getWidth() / 2,
       20,
-      { align: 'center' }
+      { align: "center" }
     );
-    
+
     const body = sortedUsers.map((user) => {
       let enrolledChittiesDisplay = "Not Enrolled";
       try {
@@ -216,7 +255,7 @@ const ChittyEnroll = () => {
       } catch (e) {
         console.error("Failed to parse enrolled_chitties:", e);
       }
-  
+
       return [
         user.id,
         user.name,
@@ -227,7 +266,7 @@ const ChittyEnroll = () => {
         enrolledChittiesDisplay,
       ];
     });
-  
+
     doc.autoTable({
       head: [
         [
@@ -244,13 +283,13 @@ const ChittyEnroll = () => {
       headStyles: {
         fillColor: [169, 169, 169],
         textColor: [0, 0, 0],
-        halign: 'center',
+        halign: "center",
       },
       styles: {
         cellPadding: 3,
         fontSize: 10,
-        valign: 'middle',
-        halign: 'left',
+        valign: "middle",
+        halign: "left",
         lineWidth: 0.1,
         lineColor: [0, 0, 0],
       },
@@ -258,16 +297,16 @@ const ChittyEnroll = () => {
       tableLineColor: [0, 0, 0],
       tableLineWidth: 0.1,
     });
-  
+
     const now = new Date();
     const day = String(now.getDate()).padStart(2, "0");
     const month = String(now.getMonth() + 1).padStart(2, "0");
     const year = now.getFullYear();
     const timestamp = `${day}${month}${year}`;
-  
+
     doc.save(`${selectedChitty.label}- ${timestamp}.pdf`);
   };
-  
+
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
   };
@@ -298,7 +337,7 @@ const ChittyEnroll = () => {
         { value: "Facebook", label: "Facebook" },
         { value: "Whatsapp", label: "Whatsapp" },
         { value: "Instagram", label: "Instagram" },
-        { value: "KSFE-Powerapp", label: "KSFE Powerapp" },
+        { value: "KSFE Powerapp", label: "KSFE Powerapp" },
         { value: "Email", label: "Email" },
       ]);
     } else if (selectedOption.value === "direct") {
@@ -377,10 +416,12 @@ const ChittyEnroll = () => {
               <button
                 onClick={handleExportPDF}
                 className={`flex items-center justify-center bg-[#252eb1] text-gray-100 font-semibold py-2 px-8 w-44 rounded-lg hover:opacity-90 ${
-                  !selectedChitty ? 'opacity-50 cursor-not-allowed' : ''
+                  !selectedChitty ? "opacity-50 cursor-not-allowed" : ""
                 }`}
                 disabled={!selectedChitty}
-                title={!selectedChitty ? 'Please select a chitty to export' : ''}
+                title={
+                  !selectedChitty ? "Please select a chitty to export" : ""
+                }
               >
                 Export <MdPictureAsPdf className="w-5 h-5 ml-2" />
               </button>
@@ -419,7 +460,6 @@ const ChittyEnroll = () => {
                 onChange={(selectedOption) =>
                   setSelectedReferenceDetail(selectedOption)
                 }
-                
               />
             )}
             <div className="w-full md:w-48">
@@ -649,7 +689,7 @@ const ChittyEnroll = () => {
           </div>
         )}
       </div>
-      <ToastContainer position="top-center" limit={1} />
+      <ToastContainer position="top-center" limit={1} autoClose={1000} />
     </>
   );
 };

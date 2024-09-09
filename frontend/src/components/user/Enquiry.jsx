@@ -34,7 +34,6 @@ const Enquiry = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [availableDistricts, setAvailableDistricts] = useState([]);
   const dropdownRef = useRef(null);
-  const [gridColumns, setGridColumns] = useState("grid-cols-2");
   const [suggestions, setSuggestions] = useState([]);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const [staffOptions, setStaffOptions] = useState([]);
@@ -288,7 +287,7 @@ const Enquiry = () => {
       try {
         const submissionData = {
           ...formData,
-          chitties: formData.chitties.map(chitty => chitty.value), // Save only the IDs
+          chitties: formData.chitties.map(chitty => chitty.value), 
           reference_detail: formData.reference_detail?.label,
         };
         if (formData.id) {
@@ -315,14 +314,27 @@ const Enquiry = () => {
         setSuggestions([]);
         setErrors({});
       } catch (error) {
-        showToast("Failed to submit form.");
+        if (error.response && error.response.data.errors) {
+          const apiErrors = error.response.data.errors;
+          const formErrors = {};
+          
+          apiErrors.forEach(err => {
+            if (err.code === "ERR_MOBILE_UNIQUE") {
+              formErrors.mobile_number = "*Mobile number must be unique";
+            }else {
+              showToast(err.message);
+            }
+          });
+  
+          setErrors(formErrors);
+        } else {
+          showToast("Failed to submit form.");
+        }
       }
     } else {
       setErrors(formErrors);
     }
-  };
-  
-  
+  };  
   
 
   return (
@@ -379,7 +391,7 @@ const Enquiry = () => {
                     Mobile<sup className="text-red-500">*</sup>
                   </label>
                   <input
-                    maxLength={12}
+                    maxLength={10}
                     className={`w-full bg-gray-100 text-gray-900 p-3 rounded-lg focus:outline-none focus:shadow-outline ${
                       errors.mobile_number ? "border-red-500" : ""
                     }`}

@@ -52,8 +52,27 @@ const Chitty = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setNewChitty((prev) => ({ ...prev, [name]: value }));
+    
+    // Update the state with the new value
+    setNewChitty((prev) => {
+      const updatedChitty = { ...prev, [name]: value };
+  
+      // Calculate total_amount if chitty_tenure and per_month_emi are provided
+      if (name === "chitty_tenure" || name === "per_month_emi") {
+        const tenure = updatedChitty.chitty_tenure;
+        const emi = updatedChitty.per_month_emi;
+        
+        if (!isNaN(tenure) && !isNaN(emi) && tenure && emi) {
+          updatedChitty.total_amount = (Number(tenure) * Number(emi)).toString();
+        } else {
+          updatedChitty.total_amount = ""; // Clear total_amount if inputs are invalid
+        }
+      }
+  
+      return updatedChitty;
+    });
   };
+  
 
   const validateData = () => {
     let errors = {};
@@ -365,7 +384,7 @@ const Chitty = () => {
             <div className="relative bg-white rounded-lg shadow">
               <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t bg-blue-800">
                 <h3 className="text-lg font-semibold text-white text-center">
-                  {isEditMode ? "Edit Employee" : "Add Chitty"}
+                  {isEditMode ? "Edit Chitty" : "Add Chitty"}
                 </h3>
                 <button
                   type="button"
@@ -434,6 +453,27 @@ const Chitty = () => {
                       </p>
                     )}
                   </div>
+                  <div className="col-span-2">
+                    <label
+                      htmlFor="per_month_emi"
+                      className="block mb-2 text-md font-medium text-gray-900"
+                    >
+                      Installment Amount
+                    </label>
+                    <input
+                      type="text"
+                      id="per_month_emi"
+                      name="per_month_emi"
+                      value={newChitty.per_month_emi}
+                      onChange={handleInputChange}
+                      className="block w-full text-md text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-600 focus:border-blue-600 p-2.5"
+                    />
+                    {formErrors.per_month_emi && (
+                      <p className="text-red-500 text-sm">
+                        {formErrors.per_month_emi}
+                      </p>
+                    )}
+                  </div>
                   <div className="col-span-1">
                     <label
                       htmlFor="chitty_tenure"
@@ -455,27 +495,7 @@ const Chitty = () => {
                       </p>
                     )}
                   </div>
-                  <div className="col-span-2">
-                    <label
-                      htmlFor="per_month_emi"
-                      className="block mb-2 text-md font-medium text-gray-900"
-                    >
-                      Per Month EMI
-                    </label>
-                    <input
-                      type="text"
-                      id="per_month_emi"
-                      name="per_month_emi"
-                      value={newChitty.per_month_emi}
-                      onChange={handleInputChange}
-                      className="block w-full text-md text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-600 focus:border-blue-600 p-2.5"
-                    />
-                    {formErrors.per_month_emi && (
-                      <p className="text-red-500 text-sm">
-                        {formErrors.per_month_emi}
-                      </p>
-                    )}
-                  </div>
+                 
                   <div className="col-span-2">
                     <label
                       htmlFor="total_amount"
