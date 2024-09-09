@@ -58,7 +58,6 @@ const AdminHome = () => {
                     <ul className="py-2 text-sm">
                       <li>
                         <a
-                          href="#"
                           className="block px-4 py-2 hover:bg-neutral-500"
                           onClick={() => handleMenuItemClick("/chitty-enrollment")}
                         >
@@ -67,7 +66,6 @@ const AdminHome = () => {
                       </li>
                       <li>
                         <a
-                          href="#"
                           className="block px-4 py-2 hover:bg-neutral-500 border-t border-gray-200"
                           onClick={() => handleMenuItemClick("/chitty")}
                         >
@@ -85,8 +83,7 @@ const AdminHome = () => {
           </div>
 
           <a
-            href="#"
-            className="flex flex-col items-center justify-center w-full h-56 p-6 bg-white border border-gray-200 rounded-lg shadow-md hover:bg-gray-50"
+            className="flex flex-col items-center justify-center cursor-pointer w-full h-56 p-6 bg-white border border-gray-200 rounded-lg shadow-md hover:bg-gray-50"
             onClick={() => navigate("/employee")}
           >
             <IoIosContacts className="w-20 h-20 mb-4 text-gray-700" />
@@ -97,9 +94,8 @@ const AdminHome = () => {
               Manage employee details and manage.
             </p>
           </a>
-          <a
-            href="#"
-            className="flex flex-col items-center justify-center w-full h-56 p-6 bg-white border border-gray-200 rounded-lg shadow-md hover:bg-gray-50"
+          <a            
+            className="flex flex-col items-center justify-center w-full h-56 p-6 cursor-pointer bg-white border border-gray-200 rounded-lg shadow-md hover:bg-gray-50"
             onClick={() => navigate("/agent")}
           >
             <MdOutlineStreetview className="w-20 h-20 mb-4 text-gray-700" />
@@ -111,7 +107,6 @@ const AdminHome = () => {
             </p>
           </a>
           <a
-            href="#"
             className="flex flex-col items-center justify-center w-full h-56 p-6 bg-white border border-gray-200 rounded-lg shadow-md hover:bg-gray-50"
             onClick={handleLogout}
           >

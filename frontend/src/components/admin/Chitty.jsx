@@ -124,17 +124,17 @@ const Chitty = () => {
   
     try {
       if (isEditMode) {
-        await updateChitty(editId, newChitty); 
+        await updateChitty(editId, newChitty);
         const updatedChitties = chitties.map((chitty) =>
           chitty.id === editId ? newChitty : chitty
         );
         setChitties(updatedChitties);
-        toast.success("Chitty updated successfully.", { toastId:"902"});
+        toast.success("Chitty updated successfully.", { toastId: "902" });
         setIsEditMode(false);
       } else {
-        await addChitty(newChitty);
-        setChitties((prev) => [...prev, newChitty]);
-        toast.success("Chitty added successfully.", { toastId:"903"});
+        const addedChitty = await addChitty(newChitty); 
+        setChitties((prev) => [...prev, addedChitty]); 
+        toast.success("Chitty added successfully.", { toastId: "903" });
       }
       setNewChitty({
         chitty_code: "",
@@ -146,14 +146,15 @@ const Chitty = () => {
       setIsModalOpen(false);
     } catch (error) {
       console.log(error);
-      
+  
       if (error.code === "ERR_CHITTY_CODE_UNIQUE") {
-        toast.error("Chitty code already exists",{toastId:"910"})
+        toast.error("Chitty code already exists", { toastId: "910" });
       } else {
-        toast.error("Failed to save chitty.", { toastId:"904"});
+        toast.error("Failed to save chitty.", { toastId: "904" });
       }
     }
-  };  
+  };
+  
   const handleSort = (key) => {
     let direction = "ascending";
     if (sortConfig.key === key && sortConfig.direction === "ascending") {

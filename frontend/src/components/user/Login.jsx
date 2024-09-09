@@ -15,7 +15,8 @@ const Login = () => {
   useEffect(() => {
     // Check for existing access token and navigate if present
     const token = localStorage.getItem("accessToken");
-    if (token) {
+    const user = localStorage.getItem("userType")
+    if (token&& user==="user") {
       navigate("/user");
     }
   }, [navigate]);

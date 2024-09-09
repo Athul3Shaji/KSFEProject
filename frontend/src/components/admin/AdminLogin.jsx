@@ -13,7 +13,9 @@ const AdminLogin = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (localStorage.getItem("accessToken")) {
+    const token = localStorage.getItem("accessToken");
+    const user = localStorage.getItem("userType")
+    if (token&&user==="admin") {
       navigate("/adminhome");
     }
   }, [navigate]);
