@@ -1,0 +1,6 @@
+FROM node:16
+RUN mkdir /node-app
+WORKDIR /node-app
+COPY . .
+RUN npm i
+CMD ["npm", "start"]
