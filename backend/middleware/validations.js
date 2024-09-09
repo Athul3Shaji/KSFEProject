@@ -42,10 +42,6 @@ const validateUserRequest = [
     body('state')
         .optional()
         .isString().withMessage('ERR_STATE_NOT_STRING|State must be a string'),
-    body('pin')
-        .optional()
-        .isNumeric().withMessage('ERR_PIN_NOT_NUMERIC|PIN must be numeric')
-        .isLength({ min: 6, max: 6 }).withMessage('ERR_PIN_LENGTH|PIN must be 6 characters'),
     body('reference')
         .notEmpty().withMessage('ERR_REFERENCE_EMPTY|Reference cannot be empty')
         .isString().withMessage('ERR_REFERENCE_NOT_STRING|Reference must be a string'),
