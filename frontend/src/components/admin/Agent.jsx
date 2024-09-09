@@ -303,15 +303,13 @@ const Agent = () => {
       <td className="px-5 py-3 text-base">{agent.agent_mobile}</td>
       <td className="px-2 py-3 flex space-x-4">
         <a
-          href="#"
-          className="text-blue-600 hover:text-blue-800"
+          className="text-blue-600 cursor-pointer hover:text-blue-800"
           onClick={() => handleEdit(agent.id)}
         >
           <MdEdit className="w-5 h-5" />
         </a>
         <a
-          href="#"
-          className="text-red-600 hover:text-red-800"
+          className="text-red-600 hover:text-red-800 cursor-pointer"
           onClick={() => handleDelete(agent.id)}
         >
           <FaTrashAlt className="w-5 h-5" />

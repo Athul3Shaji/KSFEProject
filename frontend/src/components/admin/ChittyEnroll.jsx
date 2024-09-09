@@ -661,12 +661,11 @@ const ChittyEnroll = () => {
                                   enrolled ? 0 : 1
                                 )
                               }
-                              className={`px-6 py-2 min-w-[120px] text-center text-white border rounded focus:outline-none focus:ring ${
+                              className={`px-6 py-2 min-w-[120px] text-center cursor-pointer text-white border rounded focus:outline-none focus:ring ${
                                 enrolled
                                   ? "bg-blue-600 border-blue-600 hover:bg-transparent hover:text-blue-600 active:text-violet-500"
                                   : "bg-gray-300 text-gray-700 border-gray-300 hover:bg-transparent hover:text-gray-700 active:text-gray-500"
                               }`}
-                              href="#"
                             >
                               {enrolled ? "Enrolled" : "Enroll"}
                             </a>
