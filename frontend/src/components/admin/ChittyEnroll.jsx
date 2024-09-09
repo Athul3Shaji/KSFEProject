@@ -113,7 +113,7 @@ const ChittyEnroll = () => {
       enroll_status: newStatus,
     };
 
-    const action = newStatus === 1 ? "Enroll" : "UnEnroll";
+    const action = newStatus === 1 ? "Enroll" : "Un Enroll";
     confirmAlert({
       title: `Confirm to ${action}`,
       message: `Are you sure you want to ${action} this chitty?`,
@@ -127,7 +127,7 @@ const ChittyEnroll = () => {
               const response = await updateEnrollment(chittyChange);
               toast.success(
                 `Chitty has been ${
-                  newStatus === 1 ? "Enrolled" : "Unrolled"
+                  newStatus === 1 ? "Enrolled" : "Un Enrolled"
                 } successfully.`
               );
               await refreshModalData(userId); // Refresh data after successful action

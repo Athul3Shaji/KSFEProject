@@ -458,7 +458,7 @@ const Employee = () => {
                   </button>
                 </div>
                 <form onSubmit={handleAddEmployee} className="p-4 md:p-5">
-                  <div className="grid gap-4 mb-4 grid-cols-2">
+                  <div className="grid gap-4 mb-7 grid-cols-3">
                     <div className="col-span-2">
                       <label
                         htmlFor="employee-name"
@@ -473,7 +473,7 @@ const Employee = () => {
                         value={newEmployee.name}
                         onChange={handleInputChange}
                         className="block w-full text-md text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-600 focus:border-blue-600 p-2.5"
-                        placeholder="Enter employee name"
+                        placeholder="Employee name"
                         required
                       />
                       {formErrors.name && (
@@ -496,7 +496,7 @@ const Employee = () => {
                         value={newEmployee.code}
                         onChange={handleInputChange}
                         className="block w-full text-md text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-600 focus:border-blue-600 p-2.5"
-                        placeholder="Enter employee code"
+                        placeholder="employee code"
                         required
                       />
                       {formErrors.code && (
@@ -505,7 +505,7 @@ const Employee = () => {
                         </p>
                       )}
                     </div>
-                    <div className="col-span-2 sm:col-span-1">
+                    <div className="col-span-2 sm:col-span-2">
                       <label
                         htmlFor="employee-email"
                         className="block mb-2 text-md font-medium text-gray-900"
@@ -519,7 +519,7 @@ const Employee = () => {
                         value={newEmployee.email}
                         onChange={handleInputChange}
                         className="block w-full text-md text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-600 focus:border-blue-600 p-2.5"
-                        placeholder="Enter email"
+                        placeholder="email"
                         required
                       />
                       {formErrors.email && (
@@ -543,7 +543,7 @@ const Employee = () => {
                         onChange={handleInputChange}
                         maxLength={10}
                         className="block w-full text-md text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-600 focus:border-blue-600 p-2.5"
-                        placeholder="Enter mobile number"
+                        placeholder="mobile number"
                         required
                       />
                       {formErrors.mobile && (

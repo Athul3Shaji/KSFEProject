@@ -108,17 +108,15 @@ const Enquiry = () => {
 
   const validate = () => {
     let formErrors = {};
-
+  
     if (!formData.name) formErrors.name = "*Name is required";
     if (!formData.mobile_number)
       formErrors.mobile_number = "*Mobile is required";
-    if (!formData.address) formErrors.address = "*Address is required";
-    if (!formData.district) formErrors.district = "*District is required";
-    if (!formData.state) formErrors.state = "*State is required";
-    if (!formData.pin) formErrors.pin = "*PIN is required";
     if (!formData.reference) formErrors.reference = "*Reference is required";
     if (!formData.reference_detail)
       formErrors.reference_detail = "*Reference detail is required";
+    if (!formData.follow_up_date)
+      formErrors.follow_up_date = "*Follow-up date is required";
     if (!formData.notes) formErrors.notes = "*Notes is required";
     if (
       (formData.reference === "agent" ||
@@ -130,7 +128,7 @@ const Enquiry = () => {
       formErrors.reference_detail = "*Reference detail is required";
     if (formData.chitties.length === 0)
       formErrors.chitties = "*At least one chitty must be selected";
-
+  
     // Validate mobile number
     if (formData.mobile_number) {
       if (!/^\d+$/.test(formData.mobile_number)) {
@@ -139,8 +137,8 @@ const Enquiry = () => {
         formErrors.mobile_number = "*Mobile number must be at least 10 digits";
       }
     }
-
-    // Validate PIN
+  
+    // Validate PIN (optional)
     if (formData.pin) {
       if (!/^\d+$/.test(formData.pin)) {
         formErrors.pin = "*PIN must be a number";
@@ -148,12 +146,20 @@ const Enquiry = () => {
         formErrors.pin = "*PIN must be at least 6 digits";
       }
     }
+  
+    // Validate Email (optional)
+    if (formData.email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email)) {
+        formErrors.email = "*Invalid email format";
+      }
+    }
     if (formData.notes?.length > 200) {
       formErrors.notes = "*Notes cannot exceed 200 characters";
     }
     return formErrors;
   };
-
+  
   const handleChange = async (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -414,7 +420,7 @@ const Enquiry = () => {
                     className="block text-gray-700 font-bold mb-2"
                     htmlFor="address"
                   >
-                    Address<sup className="text-red-500">*</sup>
+                    Address
                   </label>
                   <input
                     className={`w-full bg-gray-100 text-gray-900 p-3 rounded-lg focus:outline-none focus:shadow-outline ${
@@ -424,7 +430,7 @@ const Enquiry = () => {
                     name="address"
                     value={formData.address}
                     onChange={handleChange}
-                    placeholder="Address*"
+                    placeholder="Address"
                   />
                   {errors.address && (
                     <p className="text-red-500 text-sm mt-1">
@@ -455,7 +461,7 @@ const Enquiry = () => {
                     className="block text-gray-700 font-bold mb-2"
                     htmlFor="state"
                   >
-                    State<sup className="text-red-500">*</sup>
+                    State
                   </label>
                   <select
                     name="state"
@@ -482,7 +488,7 @@ const Enquiry = () => {
                     className="block text-gray-700 font-bold mb-2"
                     htmlFor="district"
                   >
-                    District<sup className="text-red-500">*</sup>
+                    District
                   </label>
                   <select
                     name="district"
@@ -511,7 +517,7 @@ const Enquiry = () => {
                     className="block text-gray-700 font-bold mb-2"
                     htmlFor="pin"
                   >
-                    PIN<sup className="text-red-500">*</sup>
+                    PIN
                   </label>
                   <input
                     maxLength={6}
@@ -522,7 +528,7 @@ const Enquiry = () => {
                     name="pin"
                     value={formData.pin}
                     onChange={handleChange}
-                    placeholder="PIN*"
+                    placeholder="PIN"
                   />
                   {errors.pin && (
                     <p className="text-red-500 text-sm mt-1">{errors.pin}</p>
@@ -647,7 +653,7 @@ const Enquiry = () => {
                     className="block text-gray-700 font-bold mb-2"
                     htmlFor="pin"
                   >
-                    Follow-Up Date
+                    Follow-Up Date<sup className="text-red-500">*</sup>
                   </label>
                   <input
                     maxLength={6}
