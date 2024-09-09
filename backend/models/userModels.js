@@ -43,15 +43,7 @@ const User = sequelize.define('User', {
     pin: {
         type: DataTypes.STRING,
         allowNull: true,
-        validate: {
-            isNumeric: {
-                msg: 'ERR_PIN_NOT_NUMERIC|PIN must be numeric'
-            },
-            len: {
-                args: [6, 6],
-                msg: 'ERR_PIN_LENGTH|PIN must be 6 characters'
-            }
-        }
+        
     },
     reference: {
         type: DataTypes.STRING,
