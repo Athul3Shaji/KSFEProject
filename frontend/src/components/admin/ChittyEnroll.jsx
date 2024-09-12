@@ -383,7 +383,7 @@ const ChittyEnroll = () => {
   };
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, selectedChitty, selectedReference]);
+  }, [searchTerm, selectedChitty, selectedReference,followUpDate]);
 
   return (
     <>

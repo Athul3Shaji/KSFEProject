@@ -83,7 +83,7 @@ const UserList = () => {
       <div className="min-h-[calc(100vh-95px)] bg-gray-100 flex flex-col items-center pt-1 pb-2 px-4">
         <div className="w-full md:w-3/4">
           <h1 className="text-4xl font-bold text-gray-800 mb-1 text-center">
-            Users List
+            Customers List
           </h1>
           <div className="flex flex-col md:flex-row w-full items-center mb-2">
             <div

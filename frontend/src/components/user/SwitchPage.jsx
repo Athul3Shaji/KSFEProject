@@ -20,7 +20,7 @@ const SwitchPage = () => {
               onClick={() => handleTabClick("enquiry")}
               className={`px-4 py-2 text-lg font-semibold ${activeComponent === "enquiry" ? "border-b-4 rounded border-blue-600 text-blue-600" : "text-gray-600 hover:text-blue-600"}`}
             >
-              Add / Search User
+              Add / Search Customer
             </button>
             <button
               onClick={() => handleTabClick("userList")}

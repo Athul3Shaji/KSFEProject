@@ -349,7 +349,7 @@ const Enquiry = () => {
         <div className="container mx-auto px-4 lg:px-20">
           <div className="w-full p-4 md:px-8 lg:pl-16 lg:pr-16 mx-auto bg-neutral-200 rounded-2xl shadow-lg">
             <div className="flex justify-center mb-2 ml-10">
-              <h1 className="font-bold uppercase text-4xl">User Details</h1>
+              <h1 className="font-bold uppercase text-4xl">Customer Details</h1>
             </div>
             <form onSubmit={handleSubmit}>
               <div className="grid grid-cols-1 gap-5 md:grid-cols-2 mt-5">
