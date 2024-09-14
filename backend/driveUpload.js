@@ -2,8 +2,9 @@ const { google } = require('googleapis');
 const path = require('path');
 const fs = require('fs');
 
+
 // Path to the service account key file (use absolute path directly)
-const KEYFILEPATH = "/home/mask-code/KSFE/KSFEProject/backend/services/cobalt-ripsaw-434014-m9-8ef6d6f6ee19.json";
+const KEYFILEPATH = "------------";
 
 // Scopes for Google Drive API
 const SCOPES = ['https://www.googleapis.com/auth/drive.file'];
@@ -40,7 +41,7 @@ async function uploadFile(filePath) {
         console.log('File uploaded successfully, File ID:', fileId);
 
         // Share the file with your personal email
-        await shareFile(fileId, 'athulshaji78@gmail.com');
+        await shareFile(fileId, "Enter The Email Address");
 
     } catch (error) {
         console.error('Error uploading file:', error);
@@ -64,5 +65,10 @@ async function shareFile(fileId, emailAddress) {
 }
 
 // Example usage:
-const filePath = "/home/mask-code/KSFE/KSFEProject/backend/package.json"; // Path to the file you want to upload
-uploadFile(filePath);
+const filePath = process.argv[2]
+if (filePath) {
+    uploadFile(filePath);
+} else {
+    console.error('Please provide the file path as a command-line argument.');
+    process.exit(1);
+}
