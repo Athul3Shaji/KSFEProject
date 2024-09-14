@@ -163,8 +163,14 @@ const ChittyEnroll = () => {
     if (id) {
       fetchUserById(id)
         .then((chit) => {
-          setChittySet(chit || []);
-          setIsModalOpen(true);
+          if (chit && chit.chitties && chit.chitties.length > 0) {
+            setChittySet(chit);
+            setIsModalOpen(true);
+          } else {
+            toast.warning("No chitties found for this user", {
+              toastId: "1022",
+            });
+          }
         })
         .catch((error) => {
           toast.error("Error fetching chitties of user", { toastId: "1021" });
@@ -172,7 +178,7 @@ const ChittyEnroll = () => {
     } else {
       setIsModalOpen(!isModalOpen);
       if (isModalOpen) {
-        loadUsers(); // Ensure `loadUsers` is available in the scope
+        loadUsers();
       }
     }
   };
@@ -231,6 +237,7 @@ const ChittyEnroll = () => {
   const handleExportPDF = () => {
     const doc = new jsPDF();
 
+    // Title
     doc.setFontSize(14);
     doc.setFont("helvetica", "bold");
     doc.text(
@@ -240,8 +247,14 @@ const ChittyEnroll = () => {
       { align: "center" }
     );
 
-    const body = sortedUsers.map((user) => {
+    const enrolledUsers = [];
+    const notEnrolledUsers = [];
+
+    // Separate users based on whether they are enrolled in the selected chitty
+    sortedUsers.forEach((user) => {
       let enrolledChittiesDisplay = "Not Enrolled";
+      let isEnrolledInSelectedChitty = false;
+
       try {
         const enrolledChittiesArray = JSON.parse(user.enrolled_chitties);
         if (
@@ -251,12 +264,18 @@ const ChittyEnroll = () => {
           enrolledChittiesDisplay = enrolledChittiesArray
             .map((chitty) => `• ${chitty.name}`)
             .join("\n");
+
+          // Check if user is enrolled in the selected chitty
+          isEnrolledInSelectedChitty = enrolledChittiesArray.some(
+            (chitty) => chitty.id === selectedChitty.value // Assuming selectedChitty.value contains the chitty ID
+          );
         }
       } catch (e) {
         console.error("Failed to parse enrolled_chitties:", e);
       }
 
-      return [
+      // Add user to the respective list
+      const userData = [
         user.id,
         user.name,
         user.mobile_number,
@@ -265,7 +284,17 @@ const ChittyEnroll = () => {
         user.reference_detail,
         enrolledChittiesDisplay,
       ];
+
+      if (isEnrolledInSelectedChitty) {
+        enrolledUsers.push(userData);
+      } else {
+        notEnrolledUsers.push(userData);
+      }
     });
+
+    // Table for "Enrolled" users
+    doc.setFontSize(12);
+    doc.text("ENROLLED USERS", 80, 30);
 
     doc.autoTable({
       head: [
@@ -279,7 +308,8 @@ const ChittyEnroll = () => {
           "Enrolled Chitties",
         ],
       ],
-      body: body,
+      body: enrolledUsers,
+      startY: 35,
       headStyles: {
         fillColor: [169, 169, 169],
         textColor: [0, 0, 0],
@@ -298,13 +328,49 @@ const ChittyEnroll = () => {
       tableLineWidth: 0.1,
     });
 
+    // Table for "Not Enrolled" users
+    doc.text("UNENROLLED USERS", 80, doc.autoTable.previous.finalY + 10);
+
+    doc.autoTable({
+      head: [
+        [
+          "ID",
+          "Name",
+          "Mobile",
+          "Email",
+          "Reference",
+          "Reference Detail",
+          "Enrolled Chitties",
+        ],
+      ],
+      body: notEnrolledUsers,
+      startY: doc.autoTable.previous.finalY + 15,
+      headStyles: {
+        fillColor: [169, 169, 169],
+        textColor: [0, 0, 0],
+        halign: "center",
+      },
+      styles: {
+        cellPadding: 3,
+        fontSize: 10,
+        valign: "middle",
+        halign: "left",
+        lineWidth: 0.1,
+        lineColor: [0, 0, 0],
+      },
+      margin: { top: 30 },
+      tableLineColor: [0, 0, 0],
+      tableLineWidth: 0.1,
+    });
+
+    // Save the PDF with timestamp
     const now = new Date();
     const day = String(now.getDate()).padStart(2, "0");
     const month = String(now.getMonth() + 1).padStart(2, "0");
     const year = now.getFullYear();
     const timestamp = `${day}${month}${year}`;
 
-    doc.save(`${selectedChitty.label}- ${timestamp}.pdf`);
+    doc.save(`${selectedChitty.label}-${timestamp}.pdf`);
   };
 
   const handlePageChange = (newPage) => {
@@ -527,13 +593,21 @@ const ChittyEnroll = () => {
                 <tbody>
                   {currentUsers.map((user, index) => (
                     <tr
-                      key={index}
-                      className={
-                        index % 2 === 0
+                    key={index}
+                    className={
+                      selectedChitty?.value &&
+                      user.enrolled_chitties &&
+                      JSON.parse(user.enrolled_chitties).some(
+                        (chitty) => selectedChitty?.value === chitty.id
+                      )
+                        ? "bg-yellow-100 border-b"
+                        : !selectedChitty?.value||selectedChitty?.value==="ALL"
+                        ? index % 2 === 0
                           ? "bg-white border-b"
                           : "bg-gray-200 border-b"
-                      }
-                    >
+                        : "bg-white border-b"
+                    }
+                  >
                       <td className="px-2 py-3 text-gray-900 text-center">
                         {user?.id}
                       </td>
@@ -568,9 +642,7 @@ const ChittyEnroll = () => {
                               ) {
                                 return enrolledChittiesArray.map(
                                   (chitty, index) => (
-                                    <li key={index} className="py-1 text-left">
-                                      {chitty.name}
-                                    </li>
+                                      <li key={index} className="py-1 text-left">{chitty.name}</li>
                                   )
                                 );
                               } else {
